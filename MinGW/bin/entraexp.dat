@@ -1,0 +1,50 @@
+AnaliseDeTexto {{{
+
+var {
+   char c[6]; int f[6];logic fim; int final;
+}
+
+void ExibirTabela ( int a, int b, int c , logic d, char e )
+var {
+	logic fim;
+}
+statements {
+
+	a := 2;
+	b := c;
+}
+
+int cAS ( int a )
+var {
+	logic abac;
+}
+statements {
+  
+  final := cAS(final);
+  return a;
+
+}
+
+main
+var {
+	int i;
+}
+statements {
+	c[2] := i;
+	c := f;
+	i := c(2);
+	call cAS(i);
+	i := ExibirTabela( c[3] ,i,i,fim,c[1]);
+
+	read( c );
+	write ( f );
+
+	call ExibirTabela( c[3] ,i,i,fim,c[1]);
+	call ExibirTabela( cAS(final) ,i,i,fim,c[2]);
+	call ExibirTabela(i,i,i,fim);
+	call ExibirTabela(i,i,i,fim,fim);
+
+  i := cAS( i  );
+}
+
+}}}
