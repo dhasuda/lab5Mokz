@@ -3279,7 +3279,7 @@ simbolo NovaTemp (int tip) {
     nometemp[2+i-j] = s[j];
   }
   simb = InsereSimb(nometemp, IDVAR, tip);
-  //simb-inic = simb->ref = VERDADE;
+  simb->inic = simb->ref = VERDADE;
   simb->array = FALSO;
   return simb;
 }
