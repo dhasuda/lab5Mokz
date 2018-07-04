@@ -130,7 +130,7 @@ struct operando {
 };
 
 struct celquad {
-	int num, oper; operando opnd1, opnd2, result;
+	int num, oper, geradaTemp; operando opnd1, opnd2, result;
 	quadrupla prox;
 };
 
@@ -201,7 +201,7 @@ const operando opndidle = {IDLEOPND, 0};
 void InicCodIntermed (void);
 void InicCodIntermMod (simbolo);
 void ImprimeQuadruplas (void);
-quadrupla GeraQuadrupla (int, operando, operando, operando);
+quadrupla GeraQuadrupla (int, operando, operando, operando, int);
 simbolo NovaTemp (int);
 void RenumQuadruplas (quadrupla, quadrupla);
 
@@ -316,7 +316,7 @@ Prog            :   {
                         InicCodIntermMod(simb);
                         opnd1.tipo = MODOPND;
                         opnd1.atr.modulo = modcorrente;
-                        GeraQuadrupla(OPENMOD, opnd1, opndidle, opndidle);
+                        GeraQuadrupla(OPENMOD, opnd1, opndidle, opndidle, 0);
                     }
                     Decls  {SetarEscopo("GLOBAL");} ModList  MainMod  CLTRIP  {
                         printf ("}}}\n");
@@ -686,7 +686,7 @@ AssignStat      :   {tabular ();} Variable
                 ;
 
 
-ExprList		:	Expression { $$ = (lista*) malloc (sizeof(lista)); $$->tipo = $1.tipo; $$->prox = NULL; GeraQuadrupla(OPATRIB, $1.opnd, opndidle, opndidle); }
+ExprList		:	Expression { $$ = (lista*) malloc (sizeof(lista)); $$->tipo = $1.tipo; $$->prox = NULL; GeraQuadrupla(OPATRIB, $1.opnd, opndidle, opndidle, 0); }
 				|	ExprList  COMMA {printf (", ");}  Expression {
                         $$ = $1;
                         lista *p = $$;
@@ -696,7 +696,7 @@ ExprList		:	Expression { $$ = (lista*) malloc (sizeof(lista)); $$->tipo = $1.tip
                         p->prox = (lista*) malloc (sizeof(lista));
                         p->prox->tipo = $4.tipo;
                         p->prox->prox = NULL;
-                        GeraQuadrupla(OPATRIB, $4.opnd, opndidle, opndidle);
+                        GeraQuadrupla(OPATRIB, $4.opnd, opndidle, opndidle, 0);
                     }
 				;
 
@@ -708,7 +708,7 @@ Expression      :   AuxExpr1 { $$ = $1;}
 
                         $$.opnd.tipo = LOGICOPND;
                         $$.opnd.atr.simb = NovaTemp($$.tipo);
-                        GeraQuadrupla(OPOR, $1.opnd, $4.opnd, $$.opnd);
+                        GeraQuadrupla(OPOR, $1.opnd, $4.opnd, $$.opnd,1);
                     }
                 ;
 AuxExpr1        :   AuxExpr2 { $$ = $1;}
@@ -719,7 +719,7 @@ AuxExpr1        :   AuxExpr2 { $$ = $1;}
 
                         $$.opnd.tipo = LOGICOPND;
                         $$.opnd.atr.simb = NovaTemp($$.tipo);
-                        GeraQuadrupla(OPAND, $1.opnd, $4.opnd, $$.opnd);
+                        GeraQuadrupla(OPAND, $1.opnd, $4.opnd, $$.opnd,1);
                     }
                 ;
 AuxExpr2        :   AuxExpr3 { $$ = $1;}
@@ -730,7 +730,7 @@ AuxExpr2        :   AuxExpr3 { $$ = $1;}
 
                         $$.opnd.tipo = LOGICOPND;
                         $$.opnd.atr.simb = NovaTemp($$.tipo);
-                        GeraQuadrupla(OPNOT, $3.opnd, opndidle, $$.opnd);
+                        GeraQuadrupla(OPNOT, $3.opnd, opndidle, $$.opnd,1);
                     }
                 ;
 
@@ -759,7 +759,7 @@ AuxExpr3        :   AuxExpr4 { $$ = $1;}
 
                         $$.opnd.tipo = LOGICOPND;
                         $$.opnd.atr.simb = NovaTemp($$.tipo);
-                        GeraQuadrupla($2, $1.opnd, $4.opnd, $$.opnd);
+                        GeraQuadrupla($2, $1.opnd, $4.opnd, $$.opnd, 1);
                     }
                 ;
 
@@ -782,7 +782,7 @@ AuxExpr4        :   Term { $$ = $1;}
                         }
 
                         $$.opnd.atr.simb = NovaTemp($$.tipo);
-                        GeraQuadrupla(OPMAIS, $1.opnd, $4.opnd, $$.opnd);
+                        GeraQuadrupla(OPMAIS, $1.opnd, $4.opnd, $$.opnd, 1);
                     }
                 ;
 
@@ -810,9 +810,9 @@ Term            :   Factor { $$ = $1;}
                                 $$.opnd.tipo = VAROPND;
                                 $$.opnd.atr.simb = NovaTemp($$.tipo);
                                 if ($2 == MULT)
-                                    GeraQuadrupla(OPMULTIP, $1.opnd, $4.opnd, $$.opnd);
+                                    GeraQuadrupla(OPMULTIP, $1.opnd, $4.opnd, $$.opnd, 1);
                                 else
-                                    GeraQuadrupla(OPDIV, $1.opnd, $4.opnd, $$.opnd);
+                                    GeraQuadrupla(OPDIV, $1.opnd, $4.opnd, $$.opnd, 1);
                                 break;
                             case MOD:
                                 if ($1.tipo != INTEIRO && $1.tipo != CARACTERE
@@ -821,7 +821,7 @@ Term            :   Factor { $$ = $1;}
                                 $$.tipo = INTEIRO;
                                 $$.opnd.tipo = VAROPND;
                                 $$.opnd.atr.simb = NovaTemp($$.tipo);
-                                GeraQuadrupla(OPRESTO, $1.opnd, $4.opnd, $$.opnd);
+                                GeraQuadrupla(OPRESTO, $1.opnd, $4.opnd, $$.opnd, 1);
                                 break;
                         }
                     }
@@ -871,7 +871,7 @@ Factor          :   Variable  {
                         else $$.tipo = INTEIRO;
                         $$.opnd.tipo = VAROPND;
                         $$.opnd.atr.simb = NovaTemp($$.tipo);
-                        GeraQuadrupla(OPMENUN, $3.opnd, opndidle, $$.opnd);
+                        GeraQuadrupla(OPMENUN, $3.opnd, opndidle, $$.opnd, 1);
                     }
                 |   OPPAR  {
                         printf ("( ");
@@ -1121,7 +1121,7 @@ void ImprimeQuadruplas (void) {
         }
       }
 
-      // printf("    num=%d, oper=%d, opnd1=%d, opnd2=%d, result=%d\n", quad->num, quad->oper, quad->opnd1, quad->opnd2, quad->result);
+     printf("    num=%d, oper=%d, opnd1=%d, opnd2=%d, result=%d, temp = %d\n", quad->num, quad->oper, quad->opnd1, quad->opnd2, quad->result, quad->geradaTemp);
     }
     printf("\n");
 
@@ -1131,10 +1131,11 @@ void ImprimeQuadruplas (void) {
 
 }
 
-quadrupla GeraQuadrupla (int oper, operando opnd1, operando opnd2, operando result) {
+quadrupla GeraQuadrupla (int oper, operando opnd1, operando opnd2, operando result, int geradaTemp) {
   quadcorrente->prox = malloc(sizeof(celquad));
   quadcorrente = quadcorrente->prox;
   quadcorrente->oper = oper;
+  quadcorrente->geradaTemp = geradaTemp;
   quadcorrente->opnd1 = opnd1;
   quadcorrente->opnd2 = opnd2;
   quadcorrente->result = result;

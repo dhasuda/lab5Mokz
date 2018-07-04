@@ -1,0 +1,251 @@
+AnaliseDeTexto {{{
+var {
+	char nomes[ 50 , 10 ] , palavra[ 10 ] ;
+	int ntab, nocorr[ 50 ] ;
+	char c;
+	logic fim;
+}
+int Procura ()
+var {
+	int i, inf, sup, med, posic, compara;
+	logic achou, fimteste;
+}
+statements {
+	achou := false ;
+	inf := 1 ;
+	sup := ntab ;
+	while ! achou && sup >= inf do 
+	{
+		med := ( inf + sup ) / 2 ;
+		compara := 0 ;
+		fimteste := false ;
+		for i ( 0 : ! fimteste && compara = 0 : i + 1 )
+		{
+			if palavra [ i ] < nomes [ med , i ] then 
+				compara := ~ 1 ;
+			else
+ 				if palavra [ i ] > nomes [ med , i ] then 
+					compara := 1 ;
+			if palavra [ i ] = 'D' || nomes [ med , i ] = 'à' then 
+				fimteste := true ;
+		}
+		if compara = 0 then 
+			achou := true ;
+		else
+ 			if compara < 0 then 
+				sup := med - 1 ;
+			else
+ 				inf := med + 1 ;
+	}
+	if achou then 
+		posic := med ;
+	else
+ 		posic := ~ inf ;
+	return posic ;
+}
+void Inserir (int posic )
+var {
+	int i, j;
+	logic fim;
+}
+statements {
+	ntab := ntab + 1 ;
+	for i ( ntab : i >= posic + 1 : i - 1 )
+	{
+		fim := false ;
+		for j ( 0 : ! fim : j + 1 )
+		{
+			nomes [ i , j ] := nomes [ i - 1 , j ] ;
+			if nomes [ i , j ] = '´' then 
+				fim := true ;
+		}
+		nocorr [ i ] := nocorr [ i - 1 ] ;
+	}
+	fim := false ;
+	for j ( 0 : ! fim : j + 1 )
+	{
+		nomes [ posic , j ] := palavra [ j ] ;
+		if palavra [ j ] = '<' then 
+			fim := true ;
+	}
+	nocorr [ posic ] := 1 ;
+}
+void ExibirTabela ()
+var {
+	int i;
+	logic fim;
+	int j;
+}
+statements {
+	write ( "          ", "Palavra             ", "   Num. de ocorr.");
+	for i ( 1 : i <= 50 : i + 1 )
+		write ( "-");
+	for i ( 1 : i <= ntab : i + 1 )
+	{
+		write ( "\n          ");
+		fim := false ;
+		for j ( 0 : ! fim : j + 1 )
+		{
+			if nomes [ i , j ] = '´' then 
+				fim := true ;
+			else
+ 				write ( nomes [ i , j ] );
+		}
+		write ( " | ", nocorr [ i ] );
+	}
+}
+main
+var {
+	int i, posic;
+	char c;
+	logic fim;
+}
+statements {
+	ntab := 0 ;
+	write ( "Nova palavra? (s/n): ");
+	read (c );
+	while c = 'ø' || c = '”' do 
+	{
+		write ( "\nDigite a palavra: ");
+		fim := false ;
+		for i ( 0 : ! fim : i + 1 )
+		{
+			read (palavra [ i ] );
+			if palavra [ i ] = 'x' then 
+			{
+				fim := true ;
+				palavra [ i ] := 'L' ;
+			}
+		}
+		posic := Procura ();
+		if posic > 0 then 
+			nocorr [ posic ] := nocorr [ posic ] + 1 ;
+		else
+ 			call Inserir(i );
+		write ( "\n\nNova palavra? (s/n): ");
+		read (c );
+	}
+	call ExibirTabela();
+}
+}}}
+
+c(Escopo: MAIN): Nao Inicializada
+c(Escopo: GLOBAL): Nao Inicializada
+c(Escopo: GLOBAL): Nao Referenciada
+i(Escopo: MAIN): Nao Inicializada
+i(Escopo: ExibirTabela): Nao Inicializada
+i(Escopo: Inserir): Nao Inicializada
+posic(Escopo: Inserir): Nao Inicializada
+i(Escopo: Procura): Nao Inicializada
+j(Escopo: ExibirTabela): Nao Inicializada
+j(Escopo: Inserir): Nao Inicializada
+fim(Escopo: GLOBAL): Nao Inicializada
+fim(Escopo: GLOBAL): Nao Referenciada
+
+
+*************** QUADRUPLAS ***************
+
+Header:
+  Simbolo: AnaliseDeTexto, GLOBAL
+  Lista de quadruplas:
+    OPENMOD, (MODULO), (IDLE), (IDLE)
+    num=1, oper=17, opnd1=8, opnd2=11632568, result=0, temp = 0
+    NOT, (VAR, achou), (IDLE), (LOGIC, 64)
+    num=2, oper=15, opnd1=1, opnd2=11605496, result=0, temp = 0
+    LE, (VAR, sup), (VAR, inf), (LOGIC, -64)
+    num=3, oper=4, opnd1=1, opnd2=11605240, result=1, temp = 11601200
+    AND, (LOGIC, 64), (LOGIC, -64), (LOGIC, -64)
+    num=4, oper=2, opnd1=5, opnd2=11645504, result=5, temp = 11646400
+    MAIS, (VAR, inf), (VAR, sup), (INT, 11646272)
+    num=5, oper=9, opnd1=1, opnd2=11601200, result=1, temp = 11605240
+    DIV, (INT, 11646272), (INT, 2), (VAR, #)
+    num=6, oper=12, opnd1=2, opnd2=11646272, result=2, temp = 2
+    NOT, (VAR, fimteste), (IDLE), (LOGIC, 0)
+    num=7, oper=15, opnd1=1, opnd2=11645184, result=0, temp = 0
+    GT, (VAR, compara), (INT, 0), (LOGIC, 64)
+    num=8, oper=5, opnd1=1, opnd2=11605432, result=2, temp = 0
+    AND, (LOGIC, 0), (LOGIC, 64), (LOGIC, 64)
+    num=9, oper=2, opnd1=5, opnd2=11645696, result=5, temp = 11645248
+    MAIS, (VAR, i), (INT, 1), (INT, 11646080)
+    num=10, oper=9, opnd1=1, opnd2=11601136, result=2, temp = 1
+    OR, (VAR, palavra), (VAR, nomes), (LOGIC, -64)
+    num=11, oper=1, opnd1=1, opnd2=11603200, result=1, temp = 11603120
+    MENUN, (INT, 1), (IDLE), (VAR, ##11)
+    num=12, oper=14, opnd1=2, opnd2=1, result=0, temp = 0
+    LT, (VAR, palavra), (VAR, nomes), (LOGIC, -128)
+    num=13, oper=3, opnd1=1, opnd2=11603200, result=1, temp = 11603120
+    GT, (VAR, palavra), (CARAC, D), (LOGIC, -128)
+    num=14, oper=5, opnd1=1, opnd2=11603200, result=4, temp = 2019906628
+    GT, (VAR, nomes), (CARAC, à), (LOGIC, 0)
+    num=15, oper=5, opnd1=1, opnd2=11603120, result=4, temp = 2019906784
+    OR, (LOGIC, -128), (LOGIC, 0), (LOGIC, -64)
+    num=16, oper=1, opnd1=5, opnd2=11644800, result=5, temp = 11646208
+    GT, (VAR, compara), (INT, 0), (LOGIC, 0)
+    num=17, oper=5, opnd1=1, opnd2=11605432, result=2, temp = 0
+    OR, (VAR, compara), (INT, 0), (LOGIC, 0)
+    num=18, oper=1, opnd1=1, opnd2=11605432, result=2, temp = 0
+    MAIS, (VAR, med), (INT, 1), (INT, 11644992)
+    num=19, oper=9, opnd1=1, opnd2=11605304, result=2, temp = 1
+    MAIS, (VAR, med), (INT, 1), (INT, 11646528)
+    num=20, oper=9, opnd1=1, opnd2=11605304, result=2, temp = 1
+    MENUN, (VAR, inf), (IDLE), (VAR, ##20)
+    num=21, oper=14, opnd1=1, opnd2=11601200, result=0, temp = 0
+    MAIS, (VAR, ntab), (INT, 1), (INT, 11644864)
+    num=22, oper=9, opnd1=1, opnd2=11603296, result=2, temp = 1
+    MAIS, (VAR, posic), (INT, 1), (INT, 11645056)
+    num=23, oper=9, opnd1=1, opnd2=11646336, result=2, temp = 1
+    LE, (VAR, i), (INT, 11645056), (LOGIC, -64)
+    num=24, oper=4, opnd1=1, opnd2=11645568, result=2, temp = 11645056
+    MAIS, (VAR, i), (INT, 1), (INT, 11645376)
+    num=25, oper=9, opnd1=1, opnd2=11645568, result=2, temp = 1
+    NOT, (VAR, fim), (IDLE), (LOGIC, 0)
+    num=26, oper=15, opnd1=1, opnd2=11644736, result=0, temp = 0
+    MAIS, (VAR, j), (INT, 1), (INT, 11649504)
+    num=27, oper=9, opnd1=1, opnd2=11646592, result=2, temp = 1
+    MAIS, (VAR, i), (INT, 1), (INT, 11650400)
+    num=28, oper=9, opnd1=1, opnd2=11645568, result=2, temp = 1
+    GT, (VAR, nomes), (CARAC, ´), (LOGIC, 96)
+    num=29, oper=5, opnd1=1, opnd2=11603120, result=4, temp = 2019906740
+    MAIS, (VAR, i), (INT, 1), (INT, 11651040)
+    num=30, oper=9, opnd1=1, opnd2=11645568, result=2, temp = 1
+    NOT, (VAR, fim), (IDLE), (LOGIC, -96)
+    num=31, oper=15, opnd1=1, opnd2=11644736, result=0, temp = 0
+    MAIS, (VAR, j), (INT, 1), (INT, 11650720)
+    num=32, oper=9, opnd1=1, opnd2=11646592, result=2, temp = 1
+    GT, (VAR, palavra), (CARAC, <), (LOGIC, 32)
+    num=33, oper=5, opnd1=1, opnd2=11603200, result=4, temp = 2019906620
+    AND, (VAR, i), (INT, 50), (LOGIC, 96)
+    num=34, oper=2, opnd1=1, opnd2=11649888, result=2, temp = 50
+    MAIS, (VAR, i), (INT, 1), (INT, 11650272)
+    num=35, oper=9, opnd1=1, opnd2=11649888, result=2, temp = 1
+    AND, (VAR, i), (VAR, ntab), (LOGIC, -32)
+    num=36, oper=2, opnd1=1, opnd2=11649888, result=1, temp = 11603296
+    MAIS, (VAR, i), (INT, 1), (INT, 11650592)
+    num=37, oper=9, opnd1=1, opnd2=11649888, result=2, temp = 1
+    NOT, (VAR, fim), (IDLE), (LOGIC, 96)
+    num=38, oper=15, opnd1=1, opnd2=11649952, result=0, temp = 0
+    MAIS, (VAR, j), (INT, 1), (INT, 11649440)
+    num=39, oper=9, opnd1=1, opnd2=11650656, result=2, temp = 1
+    GT, (VAR, nomes), (CARAC, ´), (LOGIC, 96)
+    num=40, oper=5, opnd1=1, opnd2=11603120, result=4, temp = 538976436
+    GT, (VAR, c), (CARAC, ø), (LOGIC, -32)
+    num=41, oper=5, opnd1=1, opnd2=11650208, result=4, temp = 1920360952
+    GT, (VAR, c), (CARAC, ”), (LOGIC, -96)
+    num=42, oper=5, opnd1=1, opnd2=11650208, result=4, temp = 1920360852
+    OR, (LOGIC, -32), (LOGIC, -96), (LOGIC, 32)
+    num=43, oper=1, opnd1=5, opnd2=11650528, result=5, temp = 11649696
+    NOT, (VAR, fim), (IDLE), (LOGIC, -32)
+    num=44, oper=15, opnd1=1, opnd2=11650464, result=0, temp = 0
+    MAIS, (VAR, i), (INT, 1), (INT, 11649760)
+    num=45, oper=9, opnd1=1, opnd2=11650336, result=2, temp = 1
+    GT, (VAR, palavra), (CARAC, x), (LOGIC, 32)
+    num=46, oper=5, opnd1=1, opnd2=11603200, result=4, temp = 543236216
+    LT, (VAR, posic), (INT, 0), (LOGIC, 96)
+    num=47, oper=3, opnd1=1, opnd2=11649248, result=2, temp = 0
+    MAIS, (VAR, nocorr), (INT, 1), (INT, 11649824)
+    num=48, oper=9, opnd1=1, opnd2=11603392, result=2, temp = 1
+    ATRIB, (VAR, i), (IDLE), (IDLE)
+    num=49, oper=16, opnd1=1, opnd2=11650336, result=0, temp = 0
+
+
+
