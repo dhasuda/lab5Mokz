@@ -3278,8 +3278,85 @@ void ImprimeQuadruplas (void) {
     	quadrupla prox;
     };
     */
-    for (quad = head->listquad; quad != NULL; quad = quad->prox) {
-      printf("    num=%d, oper=%d, opnd1=%d, opnd2=%d, result=%d\n", quad->num, quad->oper, quad->opnd1, quad->opnd2, quad->result);
+    for (quad = head->listquad->prox; quad != NULL; quad = quad->prox) {
+      printf("    %s, ", nomeoperquad[quad->oper]);
+
+      if ((quad->opnd1).tipo == 0) {
+        printf("(IDLE), ");
+      } else {
+        printf("(%s", nometipoopndquad[(quad->opnd1).tipo]);
+
+        if ((quad->opnd1).tipo == VAROPND) {
+          printf(", %s), ", (quad->opnd1).atr.simb->cadeia);
+        }
+        else if ((quad->opnd1).tipo == INTOPND) {
+          printf(", %d), ", (quad->opnd1).atr.valint);
+        }
+        else if ((quad->opnd1).tipo == REALOPND) {
+          printf(", %d), ", (quad->opnd1).atr.valfloat);
+        }
+        else if ((quad->opnd1).tipo == CHAROPND) {
+          printf(", %c), ", (quad->opnd1).atr.valchar);
+        }
+        else if ((quad->opnd1).tipo == LOGICOPND) {
+          printf(", %d), ", (quad->opnd1).atr.vallogic);
+        }
+        else {
+          printf("), ");
+        }
+      }
+
+      if ((quad->opnd2).tipo == 0) {
+        printf("(IDLE), ");
+      } else {
+        printf("(%s", nometipoopndquad[(quad->opnd2).tipo]);
+
+        if ((quad->opnd2).tipo == VAROPND) {
+          printf(", %s), ", (quad->opnd2).atr.simb->cadeia);
+        }
+        else if ((quad->opnd2).tipo == INTOPND) {
+          printf(", %d), ", (quad->opnd2).atr.valint);
+        }
+        else if ((quad->opnd2).tipo == REALOPND) {
+          printf(", %d), ", (quad->opnd2).atr.valfloat);
+        }
+        else if ((quad->opnd2).tipo == CHAROPND) {
+          printf(", %c), ", (quad->opnd2).atr.valchar);
+        }
+        else if ((quad->opnd2).tipo == LOGICOPND) {
+          printf(", %d), ", (quad->opnd2).atr.vallogic);
+        }
+        else {
+          printf("), ");
+        }
+      }
+
+      if ((quad->result).tipo == 0) {
+        printf("(IDLE)\n");
+      } else {
+        printf("(%s", nometipoopndquad[(quad->result).tipo]);
+
+        if ((quad->result).tipo == VAROPND) {
+          printf(", %s)\n", (quad->result).atr.simb->cadeia);
+        }
+        else if ((quad->result).tipo == INTOPND) {
+          printf(", %d)\n", (quad->result).atr.valint);
+        }
+        else if ((quad->result).tipo == REALOPND) {
+          printf(", %d)\n", (quad->result).atr.valfloat);
+        }
+        else if ((quad->result).tipo == CHAROPND) {
+          printf(", %c)\n", (quad->result).atr.valchar);
+        }
+        else if ((quad->result).tipo == LOGICOPND) {
+          printf(", %d)\n", (quad->result).atr.vallogic);
+        }
+        else {
+          printf(")\n");
+        }
+      }
+
+      // printf("    num=%d, oper=%d, opnd1=%d, opnd2=%d, result=%d\n", quad->num, quad->oper, quad->opnd1, quad->opnd2, quad->result);
     }
     printf("\n");
 
