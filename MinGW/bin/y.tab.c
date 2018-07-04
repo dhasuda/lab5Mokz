@@ -234,12 +234,12 @@
 
 /*  Definicao dos tipos de variaveis   */
 
-#define     NAOVAR      1
-#define     INTEIRO     2
-#define     LOGICO      5
+#define     NAOVAR      0
+#define     INTEIRO     1
+#define     LOGICO      2
 #define     REAL        3
 #define     CARACTERE   4
-#define     FUNCVOID    0
+#define     FUNCVOID    5
 
 /*   Definicao de outras constantes   */
 
@@ -795,8 +795,8 @@ static const yytype_uint16 yyrline[] =
      674,   689,   690,   690,   703,   704,   704,   714,   715,   715,
      725,   726,   726,   737,   738,   738,   766,   767,   767,   789,
      790,   790,   830,   837,   843,   849,   855,   861,   867,   867,
-     876,   876,   885,   890,   890,   913,   914,   914,   917,   923,
-     924,   927,   927,   933,   933,   938,   948,   938
+     876,   876,   885,   890,   890,   918,   919,   919,   922,   928,
+     929,   932,   932,   938,   938,   943,   953,   943
 };
 #endif
 
@@ -2921,27 +2921,32 @@ yyreduce:
                                         (yyval.infovar).opnd.tipo = VAROPND;
 
                                         (yyval.infovar).opnd.atr.simb = (yyval.infovar).simb;
+                                        if ((yyvsp[(3) - (3)].nsubscr) == 0) {
+                                          (yyval.infovar).opnd.atr.simb->array = FALSO;
+                                        } else {
+                                          (yyval.infovar).opnd.atr.simb->array = VERDADE;
+                                        }
                                     }
                         }
     break;
 
   case 145:
-#line 913 "lab5.y"
+#line 918 "lab5.y"
     {(yyval.nsubscr) = 0;}
     break;
 
   case 146:
-#line 914 "lab5.y"
+#line 919 "lab5.y"
     {printf ("[ ");}
     break;
 
   case 147:
-#line 915 "lab5.y"
+#line 920 "lab5.y"
     {printf ("] "); (yyval.nsubscr) = (yyvsp[(3) - (4)].nsubscr); }
     break;
 
   case 148:
-#line 918 "lab5.y"
+#line 923 "lab5.y"
     {
                         (yyval.nsubscr) = 1;
                         if ((yyvsp[(1) - (1)].infoexpr).tipo != INTEIRO && (yyvsp[(1) - (1)].infoexpr).tipo != CARACTERE)
@@ -2950,40 +2955,40 @@ yyreduce:
     break;
 
   case 149:
-#line 923 "lab5.y"
+#line 928 "lab5.y"
     {(yyval.nsubscr) = 2;}
     break;
 
   case 150:
-#line 924 "lab5.y"
+#line 929 "lab5.y"
     {(yyval.nsubscr) =3;}
     break;
 
   case 151:
-#line 927 "lab5.y"
+#line 932 "lab5.y"
     {printf (", ");}
     break;
 
   case 152:
-#line 927 "lab5.y"
+#line 932 "lab5.y"
     { if ((yyvsp[(1) - (4)].infoexpr).tipo != INTEIRO && (yyvsp[(1) - (4)].infoexpr).tipo != CARACTERE ||
                                                                     (yyvsp[(4) - (4)].infoexpr).tipo != INTEIRO && (yyvsp[(4) - (4)].infoexpr).tipo != CARACTERE)
                                                                     Incompatibilidade ("Tipo inadequado para subscrito");   }
     break;
 
   case 153:
-#line 933 "lab5.y"
+#line 938 "lab5.y"
     {printf (", ");}
     break;
 
   case 154:
-#line 933 "lab5.y"
+#line 938 "lab5.y"
     { if ((yyvsp[(4) - (4)].infoexpr).tipo != INTEIRO && (yyvsp[(4) - (4)].infoexpr).tipo != CARACTERE)
                         Incompatibilidade ("Tipo inadequado para subscrito"); }
     break;
 
   case 155:
-#line 938 "lab5.y"
+#line 943 "lab5.y"
     {
                             simb = ProcuraSimb ((yyvsp[(1) - (1)].string), "GLOBAL");
                             if (simb == NULL) NaoDeclarado ((yyvsp[(1) - (1)].string));
@@ -2997,12 +3002,12 @@ yyreduce:
     break;
 
   case 156:
-#line 948 "lab5.y"
+#line 953 "lab5.y"
     {printf ("(");}
     break;
 
   case 157:
-#line 949 "lab5.y"
+#line 954 "lab5.y"
     {
                         printf (")");
                         simb = ProcuraSimb((yyvsp[(1) - (6)].string), "GLOBAL");
@@ -3043,7 +3048,7 @@ yyreduce:
 
 
 /* Line 1267 of yacc.c.  */
-#line 3047 "y.tab.c"
+#line 3052 "y.tab.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -3257,7 +3262,7 @@ yyreturn:
 }
 
 
-#line 987 "lab5.y"
+#line 992 "lab5.y"
 
 #include "lex.yy.c"
 
@@ -3320,7 +3325,6 @@ void ImprimeQuadruplas (void) {
         printf("(%s", nometipoopndquad[(quad->opnd1).tipo]);
 
         if ((quad->opnd1).tipo == VAROPND) {
-          // printf("AEEEEEEEE");
           printf(", %s), ", (quad->opnd1).atr.simb->cadeia);
         }
         else if ((quad->opnd1).tipo == INTOPND) {
@@ -3347,7 +3351,6 @@ void ImprimeQuadruplas (void) {
         printf("(%s", nometipoopndquad[(quad->opnd2).tipo]);
 
         if ((quad->opnd2).tipo == VAROPND) {
-          // printf("AEEEEEEEE");
           printf(", %s), ", (quad->opnd2).atr.simb->cadeia);
         }
         else if ((quad->opnd2).tipo == INTOPND) {

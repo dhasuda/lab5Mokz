@@ -65,12 +65,12 @@
 
 /*  Definicao dos tipos de variaveis   */
 
-#define     NAOVAR      1
-#define     INTEIRO     2
-#define     LOGICO      5
+#define     NAOVAR      0
+#define     INTEIRO     1
+#define     LOGICO      2
 #define     REAL        3
 #define     CARACTERE   4
-#define     FUNCVOID    0
+#define     FUNCVOID    5
 
 /*   Definicao de outras constantes   */
 
@@ -906,6 +906,11 @@ Variable        :   ID  {
                                         $$.opnd.tipo = VAROPND;
 
                                         $$.opnd.atr.simb = $$.simb;
+                                        if ($3 == 0) {
+                                          $$.opnd.atr.simb->array = FALSO;
+                                        } else {
+                                          $$.opnd.atr.simb->array = VERDADE;
+                                        }
                                     }
                         }
                 ;
@@ -1046,7 +1051,6 @@ void ImprimeQuadruplas (void) {
         printf("(%s", nometipoopndquad[(quad->opnd1).tipo]);
 
         if ((quad->opnd1).tipo == VAROPND) {
-          // printf("AEEEEEEEE");
           printf(", %s), ", (quad->opnd1).atr.simb->cadeia);
         }
         else if ((quad->opnd1).tipo == INTOPND) {
@@ -1073,7 +1077,6 @@ void ImprimeQuadruplas (void) {
         printf("(%s", nometipoopndquad[(quad->opnd2).tipo]);
 
         if ((quad->opnd2).tipo == VAROPND) {
-          // printf("AEEEEEEEE");
           printf(", %s), ", (quad->opnd2).atr.simb->cadeia);
         }
         else if ((quad->opnd2).tipo == INTOPND) {
