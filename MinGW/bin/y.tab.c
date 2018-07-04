@@ -3465,7 +3465,6 @@ simbolo NovaTemp (int tip) {
     count++;
   }
   i--;
-  printf("\ni=%d\n", i);
   for (j=0; j<=i; j++) {
     nometemp[2+i-j] = s[j];
   }
@@ -3574,43 +3573,43 @@ int hash (char *cadeia) {
 /* ImprimeTabSimb: Imprime todo o conteudo da tabela de simbolos  */
 
 void ImprimeTabSimb () {
-    int i; simbolo s;
-    printf ("\n\n   TABELA  DE  SIMBOLOS:\n\n");
-    for (i = 0; i < NCLASSHASH; i++)
-        if (tabsimb[i]) {
-            printf ("Classe %d:\n", i);
-            for (s = tabsimb[i]; s!=NULL; s = s->prox){
-                printf ("  (%s, %s", s->cadeia,  nometipid[s->tid]);
-                if (s->tid == IDVAR){
-                    printf (", %s, Escopo: %s, %d, %d",
-                        nometipvar[s->tvar], s->escopo, s->inic, s->ref);
-                    if (s->array == VERDADE) {
-                        int j;
-                        printf (", EH ARRAY\n\tndims = %d, dimensoes:", s->ndims);
-                        for (j = 1; j <= s->ndims; j++)
-                                    printf ("  %d", s->dims[j]);
-                    }
-
-                }
-                if (s->tid == IDFUNC){
-                    printf (", %s, Escopo: %s",nometipvar[s->tvar], s->escopo);
-                    printf(", Quant de parametros: %d", s->param->tipo);
-                    parametros p = s->param->prox;
-                    if (s->param->prox > 0) {
-                      printf(", Tipos dos paramentros: ");
-                      while(p != NULL) {
-                        if (p->prox == NULL) {
-                          printf("%s", nometipvar[p->tipo]);
-                        } else {
-                          printf("%s, ", nometipvar[p->tipo]);
-                        }
-                        p = p->prox;
-                      }
-                    }
-                }
-                printf(")\n");
-            }
-        }
+    // int i; simbolo s;
+    // printf ("\n\n   TABELA  DE  SIMBOLOS:\n\n");
+    // for (i = 0; i < NCLASSHASH; i++)
+    //     if (tabsimb[i]) {
+    //         printf ("Classe %d:\n", i);
+    //         for (s = tabsimb[i]; s!=NULL; s = s->prox){
+    //             printf ("  (%s, %s", s->cadeia,  nometipid[s->tid]);
+    //             if (s->tid == IDVAR){
+    //                 printf (", %s, Escopo: %s, %d, %d",
+    //                     nometipvar[s->tvar], s->escopo, s->inic, s->ref);
+    //                 if (s->array == VERDADE) {
+    //                     int j;
+    //                     printf (", EH ARRAY\n\tndims = %d, dimensoes:", s->ndims);
+    //                     for (j = 1; j <= s->ndims; j++)
+    //                                 printf ("  %d", s->dims[j]);
+    //                 }
+    //
+    //             }
+    //             if (s->tid == IDFUNC){
+    //                 printf (", %s, Escopo: %s",nometipvar[s->tvar], s->escopo);
+    //                 printf(", Quant de parametros: %d", s->param->tipo);
+    //                 parametros p = s->param->prox;
+    //                 if (s->param->prox > 0) {
+    //                   printf(", Tipos dos paramentros: ");
+    //                   while(p != NULL) {
+    //                     if (p->prox == NULL) {
+    //                       printf("%s", nometipvar[p->tipo]);
+    //                     } else {
+    //                       printf("%s, ", nometipvar[p->tipo]);
+    //                     }
+    //                     p = p->prox;
+    //                   }
+    //                 }
+    //             }
+    //             printf(")\n");
+    //         }
+    //     }
 }
 
 /*  Mensagens de erros semanticos  */
