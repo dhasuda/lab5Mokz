@@ -127,6 +127,7 @@ union atribopnd {
 
 struct operando {
 	int tipo; atribopnd atr;
+  int isTemp;
 };
 
 struct celquad {
@@ -316,6 +317,7 @@ Prog            :   {
                         InicCodIntermMod(simb);
                         opnd1.tipo = MODOPND;
                         opnd1.atr.modulo = modcorrente;
+                        opnd1.isTemp = 0;
                         GeraQuadrupla(OPENMOD, opnd1, opndidle, opndidle, 0);
                     }
                     Decls  {SetarEscopo("GLOBAL");} ModList  MainMod  CLTRIP  {
@@ -686,7 +688,11 @@ AssignStat      :   {tabular ();} Variable
                 ;
 
 
-ExprList		:	Expression { $$ = (lista*) malloc (sizeof(lista)); $$->tipo = $1.tipo; $$->prox = NULL; GeraQuadrupla(OPATRIB, $1.opnd, opndidle, opndidle, 0); }
+ExprList		:	Expression {
+                $$ = (lista*) malloc (sizeof(lista));
+                $$->tipo = $1.tipo; $$->prox = NULL;
+                GeraQuadrupla(OPATRIB, $1.opnd, opndidle, opndidle, 0);
+              }
 				|	ExprList  COMMA {printf (", ");}  Expression {
                         $$ = $1;
                         lista *p = $$;
@@ -708,6 +714,7 @@ Expression      :   AuxExpr1 { $$ = $1;}
 
                         $$.opnd.tipo = LOGICOPND;
                         $$.opnd.atr.simb = NovaTemp($$.tipo);
+                        $$.opnd.isTemp = 1;
                         GeraQuadrupla(OPOR, $1.opnd, $4.opnd, $$.opnd,1);
                     }
                 ;
@@ -719,6 +726,7 @@ AuxExpr1        :   AuxExpr2 { $$ = $1;}
 
                         $$.opnd.tipo = LOGICOPND;
                         $$.opnd.atr.simb = NovaTemp($$.tipo);
+                        $$.opnd.isTemp = 1;
                         GeraQuadrupla(OPAND, $1.opnd, $4.opnd, $$.opnd,1);
                     }
                 ;
@@ -730,6 +738,7 @@ AuxExpr2        :   AuxExpr3 { $$ = $1;}
 
                         $$.opnd.tipo = LOGICOPND;
                         $$.opnd.atr.simb = NovaTemp($$.tipo);
+                        $$.opnd.isTemp = 1;
                         GeraQuadrupla(OPNOT, $3.opnd, opndidle, $$.opnd,1);
                     }
                 ;
@@ -759,6 +768,7 @@ AuxExpr3        :   AuxExpr4 { $$ = $1;}
 
                         $$.opnd.tipo = LOGICOPND;
                         $$.opnd.atr.simb = NovaTemp($$.tipo);
+                        $$.opnd.isTemp = 1;
                         GeraQuadrupla($2, $1.opnd, $4.opnd, $$.opnd, 1);
                     }
                 ;
@@ -782,6 +792,7 @@ AuxExpr4        :   Term { $$ = $1;}
                         }
 
                         $$.opnd.atr.simb = NovaTemp($$.tipo);
+                        $$.opnd.isTemp = 1;
                         GeraQuadrupla(OPMAIS, $1.opnd, $4.opnd, $$.opnd, 1);
                     }
                 ;
@@ -809,6 +820,7 @@ Term            :   Factor { $$ = $1;}
                                 else $$.tipo = INTEIRO;
                                 $$.opnd.tipo = VAROPND;
                                 $$.opnd.atr.simb = NovaTemp($$.tipo);
+                                $$.opnd.isTemp = 1;
                                 if ($2 == MULT)
                                     GeraQuadrupla(OPMULTIP, $1.opnd, $4.opnd, $$.opnd, 1);
                                 else
@@ -821,6 +833,7 @@ Term            :   Factor { $$ = $1;}
                                 $$.tipo = INTEIRO;
                                 $$.opnd.tipo = VAROPND;
                                 $$.opnd.atr.simb = NovaTemp($$.tipo);
+                                $$.opnd.isTemp = 1;
                                 GeraQuadrupla(OPRESTO, $1.opnd, $4.opnd, $$.opnd, 1);
                                 break;
                         }
@@ -871,6 +884,7 @@ Factor          :   Variable  {
                         else $$.tipo = INTEIRO;
                         $$.opnd.tipo = VAROPND;
                         $$.opnd.atr.simb = NovaTemp($$.tipo);
+                        $$.opnd.isTemp = 1;
                         GeraQuadrupla(OPMENUN, $3.opnd, opndidle, $$.opnd, 1);
                     }
                 |   OPPAR  {
@@ -1050,7 +1064,10 @@ void ImprimeQuadruplas (void) {
       } else {
         printf("(%s", nometipoopndquad[(quad->opnd1).tipo]);
 
-        if ((quad->opnd1).tipo == VAROPND) {
+        if ((quad->opnd1).isTemp == 1) {
+          printf(", %s), ", (quad->opnd1).atr.simb->cadeia);
+        }
+        else if ((quad->opnd1).tipo == VAROPND) {
           printf(", %s), ", (quad->opnd1).atr.simb->cadeia);
         }
         else if ((quad->opnd1).tipo == INTOPND) {
@@ -1076,7 +1093,10 @@ void ImprimeQuadruplas (void) {
       else {
         printf("(%s", nometipoopndquad[(quad->opnd2).tipo]);
 
-        if ((quad->opnd2).tipo == VAROPND) {
+        if ((quad->opnd1).isTemp == 1) {
+          printf(", %s), ", (quad->opnd1).atr.simb->cadeia);
+        }
+        else if ((quad->opnd2).tipo == VAROPND) {
           printf(", %s), ", (quad->opnd2).atr.simb->cadeia);
         }
         else if ((quad->opnd2).tipo == INTOPND) {
@@ -1101,7 +1121,10 @@ void ImprimeQuadruplas (void) {
       }
       else {
         printf("(%s", nometipoopndquad[(quad->result).tipo]);
-        if ((quad->result).tipo == VAROPND) {
+        if ((quad->opnd1).isTemp == 1) {
+          printf(", %s), ", (quad->opnd1).atr.simb->cadeia);
+        }
+        else if ((quad->result).tipo == VAROPND) {
           printf(", %s)\n", (quad->result).atr.simb->cadeia);
         }
         else if ((quad->result).tipo == INTOPND) {
@@ -1121,7 +1144,7 @@ void ImprimeQuadruplas (void) {
         }
       }
 
-     printf("    num=%d, oper=%d, opnd1=%d, opnd2=%d, result=%d, temp = %d\n", quad->num, quad->oper, quad->opnd1, quad->opnd2, quad->result, quad->geradaTemp);
+     // printf("    num=%d, oper=%d, opnd1=%d, opnd2=%d, result=%d, temp = %d\n", quad->num, quad->oper, quad->opnd1, quad->opnd2, quad->result, quad->geradaTemp);
     }
     printf("\n");
 
