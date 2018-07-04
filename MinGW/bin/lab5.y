@@ -904,8 +904,8 @@ Variable        :   ID  {
                                         else if ($$.simb->ndims != $3)
                                             Incompatibilidade ("Numero de subscritos incompativel com declaracao");
                                         $$.opnd.tipo = VAROPND;
-                                        if ($3 == 0)
-                                          $$.opnd.atr.simb = $$.simb;
+
+                                        $$.opnd.atr.simb = $$.simb;
                                     }
                         }
                 ;
@@ -1047,7 +1047,7 @@ void ImprimeQuadruplas (void) {
 
         if ((quad->opnd1).tipo == VAROPND) {
           // printf("AEEEEEEEE");
-          // printf(", %s), ", (quad->opnd1).atr.simb->cadeia);
+          printf(", %s), ", (quad->opnd1).atr.simb->cadeia);
         }
         else if ((quad->opnd1).tipo == INTOPND) {
           printf(", %d), ", (quad->opnd1).atr.valint);
@@ -1074,7 +1074,7 @@ void ImprimeQuadruplas (void) {
 
         if ((quad->opnd2).tipo == VAROPND) {
           // printf("AEEEEEEEE");
-          // printf(", %s), ", (quad->opnd2).atr.simb->cadeia);
+          printf(", %s), ", (quad->opnd2).atr.simb->cadeia);
         }
         else if ((quad->opnd2).tipo == INTOPND) {
           printf(", %d), ", (quad->opnd2).atr.valint);

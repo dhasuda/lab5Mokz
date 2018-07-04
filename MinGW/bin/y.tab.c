@@ -2919,8 +2919,8 @@ yyreduce:
                                         else if ((yyval.infovar).simb->ndims != (yyvsp[(3) - (3)].nsubscr))
                                             Incompatibilidade ("Numero de subscritos incompativel com declaracao");
                                         (yyval.infovar).opnd.tipo = VAROPND;
-                                        if ((yyvsp[(3) - (3)].nsubscr) == 0)
-                                          (yyval.infovar).opnd.atr.simb = (yyval.infovar).simb;
+
+                                        (yyval.infovar).opnd.atr.simb = (yyval.infovar).simb;
                                     }
                         }
     break;
