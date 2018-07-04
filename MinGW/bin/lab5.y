@@ -975,7 +975,44 @@ void InicCodIntermMod (simbolo simb) {
 }
 
 void ImprimeQuadruplas (void) {
-  printf("NOT IMPLEMENTED: ImprimeQuadruplas\n");
+  printf("\n\n*************** QUADRUPLAS ***************\n\n");
+
+  quadrupla quad;
+  modhead head;
+
+  for(head = codintermed->prox; head != NULL; head = head->prox) {
+    printf("Header:\n");
+    /*
+    struct celmodhead {
+	    simbolo modname; modhead prox;
+	     quadrupla listquad;
+    };
+
+    */
+    printf("  Simbolo: %s, %s\n", head->modname->cadeia, head->modname->escopo);
+    // char *cadeia;
+    // char *escopo;
+    // int tid, tvar, ndims, dims[MAXDIMS+1];
+    // char inic, ref, array;
+    // simbolo prox;
+    // parametros param;
+
+    printf("  Lista de quadruplas:\n");
+    /*
+    struct celquad {
+    	int num, oper; operando opnd1, opnd2, result;
+    	quadrupla prox;
+    };
+    */
+    for (quad = head->listquad; quad != NULL; quad = quad->prox) {
+      printf("    num=%d, oper=%d, opnd1=%d, opnd2=%d, result=%d\n", quad->num, quad->oper, quad->opnd1, quad->opnd2, quad->result);
+    }
+    printf("\n");
+
+  }
+  printf("\n\n");
+
+
 }
 
 quadrupla GeraQuadrupla (int oper, operando opnd1, operando opnd2, operando result) {

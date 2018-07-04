@@ -116,7 +116,7 @@ statements {
 		if posic > 0 then
 			nocorr[posic] := nocorr[posic] + 1;
 		else
-			call Inserir (~posic, i);
+			call Inserir (i);
         	write ("\n\nNova palavra? (s/n): ");
         	read (c);
 	}
