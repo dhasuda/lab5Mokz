@@ -1,0 +1,17 @@
+/*  Programa para contar as ocorrencias das
+    palavras de um texto                    */
+
+AnaliseDeTexto {{{
+
+/*  Modulo principal  */
+main
+var {
+	int i, posic;
+    	char c; logic fim;
+}
+statements {
+  i := 3;
+  posic := i + i;
+  fim := i > posic;
+}
+}}}

@@ -121,7 +121,7 @@ typedef lista *parametros;
 
 union atribopnd {
 	simbolo simb; int valint; float valfloat;
-	char valchar; char vallogic; char *valcad;
+	char *valchar; char vallogic; char *valcad;
 	quadrupla rotulo; modhead modulo;
 };
 
@@ -390,7 +390,7 @@ ModList         :
                 |   ModList  Module
                 ;
 
-Module          :   ModHeader  ModBody {
+Module          :   ModHeader ModBody {
                     if ($1 == INTEIRO)
                     {
                         if($2[0] == 1 || $2[REAL] == 1 || $2[LOGICO] == 1)
@@ -439,6 +439,9 @@ ModHeader       :   Type ID OPPAR  CLPAR {
                         $$ = tipocorrente;
                         SetarEscopo($2);
 
+                        simb = ProcuraSimb ($2, "GLOBAL");
+                        InicCodIntermMod(simb);
+
                         }
                 |   Type ID OPPAR {
                         simb = ProcuraSimb ($2, "GLOBAL");
@@ -448,6 +451,9 @@ ModHeader       :   Type ID OPPAR  CLPAR {
                         printf ("%s (", $2);
                         $$ = tipocorrente;
                         SetarEscopo($2);
+
+                        simb = ProcuraSimb ($2, "GLOBAL");
+                        InicCodIntermMod(simb);
 
                         } ParamList  CLPAR {printf (")\n"); }
                 ;
@@ -678,12 +684,18 @@ AssignStat      :   {tabular ();} Variable
                     ASSIGN  {printf (":= ");}  Expression  SCOLON
                     {
                         printf (";\n");
-                        if ($2.simb != NULL)
+                        if ($2.simb != NULL) {
                             if ((($2.simb->tvar == INTEIRO || $2.simb->tvar == CARACTERE) &&
                                 ($6.tipo == REAL || $6.tipo == LOGICO)) ||
                                 ($2.simb->tvar == REAL && $6.tipo == LOGICO) ||
                                 ($2.simb->tvar == LOGICO && $6.tipo != LOGICO))
                                 Incompatibilidade ("Lado direito de comando de atribuicao improprio");
+                            operando resultOp;
+                            resultOp.isTemp = 0;
+                            resultOp.tipo = VAROPND;
+                            resultOp.atr.simb = $2.simb;
+                            GeraQuadrupla(OPATRIB, $6.opnd, opndidle, resultOp, 0);
+                        }
                     }
                 ;
 
@@ -712,7 +724,7 @@ Expression      :   AuxExpr1 { $$ = $1;}
                             Incompatibilidade ("Operando improprio para operador or");
                         $$.tipo = LOGICO;
 
-                        $$.opnd.tipo = LOGICOPND;
+                        $$.opnd.tipo = VAROPND;
                         $$.opnd.atr.simb = NovaTemp($$.tipo);
                         $$.opnd.isTemp = 1;
                         GeraQuadrupla(OPOR, $1.opnd, $4.opnd, $$.opnd,1);
@@ -724,7 +736,7 @@ AuxExpr1        :   AuxExpr2 { $$ = $1;}
                             Incompatibilidade ("Operando improprio para operador and");
                         $$.tipo = LOGICO;
 
-                        $$.opnd.tipo = LOGICOPND;
+                        $$.opnd.tipo = VAROPND;
                         $$.opnd.atr.simb = NovaTemp($$.tipo);
                         $$.opnd.isTemp = 1;
                         GeraQuadrupla(OPAND, $1.opnd, $4.opnd, $$.opnd,1);
@@ -736,7 +748,7 @@ AuxExpr2        :   AuxExpr3 { $$ = $1;}
                             Incompatibilidade ("Operando improprio para operador not");
                         $$.tipo = LOGICO;
 
-                        $$.opnd.tipo = LOGICOPND;
+                        $$.opnd.tipo = VAROPND;
                         $$.opnd.atr.simb = NovaTemp($$.tipo);
                         $$.opnd.isTemp = 1;
                         GeraQuadrupla(OPNOT, $3.opnd, opndidle, $$.opnd,1);
@@ -766,7 +778,7 @@ AuxExpr3        :   AuxExpr4 { $$ = $1;}
                         }
                         $$.tipo = LOGICO;
 
-                        $$.opnd.tipo = LOGICOPND;
+                        $$.opnd.tipo = VAROPND;
                         $$.opnd.atr.simb = NovaTemp($$.tipo);
                         $$.opnd.isTemp = 1;
                         GeraQuadrupla($2, $1.opnd, $4.opnd, $$.opnd, 1);
@@ -784,13 +796,12 @@ AuxExpr4        :   Term { $$ = $1;}
                             Incompatibilidade ("Operando improprio para operador aritmetico");
                         if ($1.tipo == REAL || $4.tipo == REAL) {
                           $$.tipo = REAL;
-                          $$.opnd.tipo = REALOPND;
                         }
                         else {
                           $$.tipo = INTEIRO;
-                          $$.opnd.tipo = INTOPND;
                         }
 
+                        $$.opnd.tipo = VAROPND;
                         $$.opnd.atr.simb = NovaTemp($$.tipo);
                         $$.opnd.isTemp = 1;
                         GeraQuadrupla(OPMAIS, $1.opnd, $4.opnd, $$.opnd, 1);
@@ -860,7 +871,7 @@ Factor          :   Variable  {
                         $$.opnd.atr.valfloat = $1;
                     }
                 |   CHARCT  {
-                        printf ("\'%c\' ", $1);
+                        printf ("\'%s\' ", $1);
                         $$.tipo = CARACTERE;
                         $$.opnd.tipo = CHAROPND;
                         $$.opnd.atr.valchar = $1;
@@ -1074,10 +1085,10 @@ void ImprimeQuadruplas (void) {
           printf(", %d), ", (quad->opnd1).atr.valint);
         }
         else if ((quad->opnd1).tipo == REALOPND) {
-          printf(", %d), ", (quad->opnd1).atr.valfloat);
+          printf(", %f), ", (quad->opnd1).atr.valfloat);
         }
         else if ((quad->opnd1).tipo == CHAROPND) {
-          printf(", %c), ", (quad->opnd1).atr.valchar);
+          printf(", %s), ", (quad->opnd1).atr.valchar);
         }
         else if ((quad->opnd1).tipo == LOGICOPND) {
           printf(", %d), ", (quad->opnd1).atr.vallogic);
@@ -1103,10 +1114,10 @@ void ImprimeQuadruplas (void) {
           printf(", %d), ", (quad->opnd2).atr.valint);
         }
         else if ((quad->opnd2).tipo == REALOPND) {
-          printf(", %d), ", (quad->opnd2).atr.valfloat);
+          printf(", %f), ", (quad->opnd2).atr.valfloat);
         }
         else if ((quad->opnd2).tipo == CHAROPND) {
-          printf(", %c), ", (quad->opnd2).atr.valchar);
+          printf(", %s), ", (quad->opnd2).atr.valchar);
         }
         else if ((quad->opnd2).tipo == LOGICOPND) {
           printf(", %d), ", (quad->opnd2).atr.vallogic);
@@ -1121,8 +1132,8 @@ void ImprimeQuadruplas (void) {
       }
       else {
         printf("(%s", nometipoopndquad[(quad->result).tipo]);
-        if ((quad->opnd1).isTemp == 1) {
-          printf(", %s), ", (quad->opnd1).atr.simb->cadeia);
+        if ((quad->result).isTemp == 1) {
+          printf(", %s)\n", (quad->result).atr.simb->cadeia);
         }
         else if ((quad->result).tipo == VAROPND) {
           printf(", %s)\n", (quad->result).atr.simb->cadeia);
@@ -1131,10 +1142,10 @@ void ImprimeQuadruplas (void) {
           printf(", %d)\n", (quad->result).atr.valint);
         }
         else if ((quad->result).tipo == REALOPND) {
-          printf(", %d)\n", (quad->result).atr.valfloat);
+          printf(", %f)\n", (quad->result).atr.valfloat);
         }
         else if ((quad->result).tipo == CHAROPND) {
-          printf(", %c)\n", (quad->result).atr.valchar);
+          printf(", %s)\n", (quad->result).atr.valchar);
         }
         else if ((quad->result).tipo == LOGICOPND) {
           printf(", %d)\n", (quad->result).atr.vallogic);
@@ -1174,13 +1185,17 @@ simbolo NovaTemp (int tip) {
   char nometemp[10] = "##", s[10] = {0};
   numtemp++;
   temp = numtemp;
+  int count = 0;
   for(i=0; temp>0; temp/=10, i++) {
     s[i] = temp % 10 + '0';
+    count++;
   }
   i--;
-  for (j=0; j<=1; j++) {
+  printf("\ni=%d\n", i);
+  for (j=0; j<=i; j++) {
     nometemp[2+i-j] = s[j];
   }
+  nometemp[count+2] = '\0';
   simb = InsereSimb(nometemp, IDVAR, tip);
   simb->inic = simb->ref = VERDADE;
   simb->array = FALSO;
@@ -1285,43 +1300,43 @@ int hash (char *cadeia) {
 /* ImprimeTabSimb: Imprime todo o conteudo da tabela de simbolos  */
 
 void ImprimeTabSimb () {
-    // int i; simbolo s;
-    // printf ("\n\n   TABELA  DE  SIMBOLOS:\n\n");
-    // for (i = 0; i < NCLASSHASH; i++)
-    //     if (tabsimb[i]) {
-    //         printf ("Classe %d:\n", i);
-    //         for (s = tabsimb[i]; s!=NULL; s = s->prox){
-    //             printf ("  (%s, %s", s->cadeia,  nometipid[s->tid]);
-    //             if (s->tid == IDVAR){
-    //                 printf (", %s, Escopo: %s, %d, %d",
-    //                     nometipvar[s->tvar], s->escopo, s->inic, s->ref);
-    //                 if (s->array == VERDADE) {
-    //                     int j;
-    //                     printf (", EH ARRAY\n\tndims = %d, dimensoes:", s->ndims);
-    //                     for (j = 1; j <= s->ndims; j++)
-    //                                 printf ("  %d", s->dims[j]);
-    //                 }
-    //
-    //             }
-    //             if (s->tid == IDFUNC){
-    //                 printf (", %s, Escopo: %s",nometipvar[s->tvar], s->escopo);
-    //                 printf(", Quant de parametros: %d", s->param->tipo);
-    //                 parametros p = s->param->prox;
-    //                 if (s->param->prox > 0) {
-    //                   printf(", Tipos dos paramentros: ");
-    //                   while(p != NULL) {
-    //                     if (p->prox == NULL) {
-    //                       printf("%s", nometipvar[p->tipo]);
-    //                     } else {
-    //                       printf("%s, ", nometipvar[p->tipo]);
-    //                     }
-    //                     p = p->prox;
-    //                   }
-    //                 }
-    //             }
-    //             printf(")\n");
-    //         }
-    //     }
+    int i; simbolo s;
+    printf ("\n\n   TABELA  DE  SIMBOLOS:\n\n");
+    for (i = 0; i < NCLASSHASH; i++)
+        if (tabsimb[i]) {
+            printf ("Classe %d:\n", i);
+            for (s = tabsimb[i]; s!=NULL; s = s->prox){
+                printf ("  (%s, %s", s->cadeia,  nometipid[s->tid]);
+                if (s->tid == IDVAR){
+                    printf (", %s, Escopo: %s, %d, %d",
+                        nometipvar[s->tvar], s->escopo, s->inic, s->ref);
+                    if (s->array == VERDADE) {
+                        int j;
+                        printf (", EH ARRAY\n\tndims = %d, dimensoes:", s->ndims);
+                        for (j = 1; j <= s->ndims; j++)
+                                    printf ("  %d", s->dims[j]);
+                    }
+
+                }
+                if (s->tid == IDFUNC){
+                    printf (", %s, Escopo: %s",nometipvar[s->tvar], s->escopo);
+                    printf(", Quant de parametros: %d", s->param->tipo);
+                    parametros p = s->param->prox;
+                    if (s->param->prox > 0) {
+                      printf(", Tipos dos paramentros: ");
+                      while(p != NULL) {
+                        if (p->prox == NULL) {
+                          printf("%s", nometipvar[p->tipo]);
+                        } else {
+                          printf("%s, ", nometipvar[p->tipo]);
+                        }
+                        p = p->prox;
+                      }
+                    }
+                }
+                printf(")\n");
+            }
+        }
 }
 
 /*  Mensagens de erros semanticos  */
