@@ -62,6 +62,7 @@
 #define		CADOPND		    6
 #define		ROTOPND		    7
 #define		MODOPND		    8
+#define   FUNCAO        9
 
 /*  Definicao dos tipos de variaveis   */
 
@@ -101,8 +102,8 @@ char *nomeoperquad[23] = {"",
 	Strings para tipos de operandos de quadruplas
  */
 
-char *nometipoopndquad[9] = {"IDLE",
-	"VAR", "INT", "REAL", "CARAC", "LOGIC", "CADEIA", "ROTULO", "MODULO"
+char *nometipoopndquad[10] = {"IDLE",
+	"VAR", "INT", "REAL", "CARAC", "LOGIC", "CADEIA", "ROTULO", "MODULO", "FUNCAO"
 };
 
 /* Declaracoes para a estrutura do codigo intermediario */
@@ -477,7 +478,16 @@ Parameter       :   Type  ID {
 ModBody         :   Decls  Stats {$$[0] = $2[0]; $$[1] = $2[1]; $$[2] = $2[2]; $$[3] = $2[3]; $$[4] = $2[4];}
                 ;
 
-MainMod         :   MAIN {printf("main\n"); SetarEscopo("MAIN");} ModBody {SetarEscopo("GLOBAL");}
+MainMod         :   MAIN {
+                      printf("main\n");
+                      SetarEscopo("MAIN");
+
+                      simb = InsereSimb("MAIN", "GLOBAL", NAOVAR);
+                      InicCodIntermMod(simb);
+
+                    } ModBody {
+                      SetarEscopo("GLOBAL");
+                    }
                 ;
 
 Stats           :   STATEMENTS  {printf ("statements ");tab++;}  CompStat {tab--; $$[0] = $3[0]; $$[1] = $3[1]; $$[2] = $3[2]; $$[3] = $3[3]; $$[4] = $3[4];}
@@ -908,7 +918,12 @@ Factor          :   Variable  {
                       $$.opnd = $3.opnd;
                     }
                 |   FuncCall {
-                            $$ = $1;
+                            // $$ = $1;
+                            $$.tipo = NAOVAR;
+                            $$.opnd.tipo = FUNCAO;
+                            // $$.opnd.atr.simb->cadeia = $$.opn;
+                            $$.opnd.isTemp = 0;
+                            // printf("********************** tipo=%s **********************", $1.opnd.atr.simb->cadeia);
                     }
                 ;
 
@@ -972,9 +987,13 @@ FuncCall        :       ID  {
                             else if (simb->tvar == FUNCVOID) TipoFuncaoInadequado ($1);
                             else if ( strcmp(simb->cadeia, escopocorrente) == 0) RecursividadeNaoAdimitida();
                             else{
-                                $$.tipo = simb->tvar;
+                                // $$.tipo = simb->tvar;
+                                $$.opnd.tipo = FUNCAO;
+                                $$.opnd.atr.simb = simb;
+                                $$.opnd.atr.simb->cadeia = $1;
                             }
-                            printf ("%s ", $1);}
+                            printf("%s", $1);
+                          }
                         OPPAR {printf ("(");} Arguments  CLPAR
                         {
                         printf (")");
@@ -987,6 +1006,25 @@ FuncCall        :       ID  {
                             lista *aux = $5;
                             int deuRuim = 0;
                             int tamanhoDoSubido = 0;
+
+                            $$.opnd.tipo = FUNCAO;
+                            $$.opnd.atr.simb = simb;
+                            $$.opnd.atr.simb->cadeia = $1;
+                            operando op;
+                            op.tipo = FUNCAO;
+                            op.atr.simb = simb;
+                            op.isTemp = 0;
+
+                            operando op2;
+                            op2.tipo = INTOPND;
+                            op2.atr.valint = simb->ndims;
+                            op2.isTemp = 0;
+
+                            operando result;
+                            result.tipo = VAROPND;
+                            result.atr.simb = NovaTemp($$.tipo);
+                            result.isTemp = 1;
+                            GeraQuadrupla(OPCALL, op, op2, result, 1);
 
                             while (aux != NULL) {
                                 tamanhoDoSubido++;
@@ -1068,6 +1106,7 @@ void ImprimeQuadruplas (void) {
     };
     */
     for (quad = head->listquad->prox; quad != NULL; quad = quad->prox) {
+
       printf("    %s, ", nomeoperquad[quad->oper]);
 
       if ((quad->opnd1).tipo == 0) {
@@ -1092,6 +1131,9 @@ void ImprimeQuadruplas (void) {
         }
         else if ((quad->opnd1).tipo == LOGICOPND) {
           printf(", %d), ", (quad->opnd1).atr.vallogic);
+        }
+        else if ((quad->opnd1).tipo == FUNCAO) {
+          printf(", %s), ", (quad->opnd1).atr.simb->cadeia);
         }
         else {
           printf("), ");
@@ -1121,6 +1163,10 @@ void ImprimeQuadruplas (void) {
         }
         else if ((quad->opnd2).tipo == LOGICOPND) {
           printf(", %d), ", (quad->opnd2).atr.vallogic);
+        }
+        else if ((quad->opnd2).tipo == FUNCAO) {
+          // printf(", %s), ", (quad->opnd1).atr.simb->cadeia);
+          printf("fudeu");
         }
         else {
           printf("), ");
