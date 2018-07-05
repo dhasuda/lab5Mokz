@@ -328,8 +328,9 @@ Prog            :   {
                         opnd1.isTemp = 0;
                         GeraQuadrupla(OPENMOD, opnd1, opndidle, opndidle, 0);
                     }
-                    Decls  {SetarEscopo("GLOBAL");} ModList  MainMod  CLTRIP  {
+                    Decls  {SetarEscopo("GLOBAL");} ModList MainMod CLTRIP  {
                         printf ("}}}\n");
+
                         VerificaInicRef ();
                         ImprimeTabSimb ();
                         ImprimeQuadruplas();
@@ -435,6 +436,7 @@ Module          :   ModHeader ModBody {
                         }
                         GeraQuadrupla(OPRET, opndidle, opndidle, opndidle, 0);
                     }
+
                     SetarEscopo("GLOBAL");
                 }
                 ;
@@ -450,7 +452,6 @@ ModHeader       :   Type ID OPPAR  CLPAR {
 
                         simb = ProcuraSimb ($2, "GLOBAL");
                         InicCodIntermMod(simb);
-
                         }
                 |   Type ID OPPAR {
                         simb = ProcuraSimb ($2, "GLOBAL");
@@ -488,6 +489,7 @@ ModBody         :   Decls  Stats {$$[0] = $2[0]; $$[1] = $2[1]; $$[2] = $2[2]; $
 
 MainMod         :   MAIN {
                       printf("main\n");
+
                       SetarEscopo("MAIN");
 
                       simb = InsereSimb("MAIN", "GLOBAL", NAOVAR);
@@ -675,8 +677,6 @@ ForStat         :   {tabular ();}
                             if($12.tipo != LOGICO){
                                 Esperado("Segunda expressao do FOR logica");
                             }
-                            // $<quad1>$ = GeraQuadrupla(OPNONE, opndidle, opndidle, opndidle, 0);
-
                             operando opaux;
                             opaux.tipo = ROTOPND;
                             opaux.atr.rotulo = quadaux;
@@ -954,7 +954,7 @@ AuxExpr4        :   Term { $$ = $1;}
                     }
                 ;
 
-Term            :   Factor { $$ = $1;}
+Term            :   Factor { $$ = $1; }
                 |   Term  MULTOP  {
                         switch ($2) {
                             case MULT:
@@ -1123,7 +1123,7 @@ FuncCall        :       ID  {
                             else if (simb->tvar == FUNCVOID) TipoFuncaoInadequado ($1);
                             else if ( strcmp(simb->cadeia, escopocorrente) == 0) RecursividadeNaoAdimitida();
                             else{
-                                // $$.tipo = simb->tvar;
+                                $$.tipo = simb->tvar;
                                 $$.opnd.tipo = FUNCAO;
                                 $$.opnd.atr.simb = simb;
                                 $$.opnd.atr.simb->cadeia = $1;
