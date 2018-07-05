@@ -50,6 +50,10 @@
 #define		OPJF			20
 #define   PARAM     21
 #define   OPCALL    22
+#define   OPRET    23
+#define   OPREAD   24
+#define   OPWRITE   25
+#define   OPNONE    26
 
 /* Definicao de constantes para os tipos de operandos de quadruplas */
 
@@ -92,10 +96,10 @@ char *nometipvar[6] = {"NAOVAR",
 
 /* Strings para operadores de quadruplas */
 
-char *nomeoperquad[23] = {"",
+char *nomeoperquad[27] = {"",
 	"OR", "AND", "LT", "LE", "GT", "GE", "EQ", "NE", "MAIS",
 	"MENOS", "MULT", "DIV", "RESTO", "MENUN", "NOT", "ATRIB",
-	"OPENMOD", "NOP", "JUMP", "JF", "PARAM", "OPCALL"
+	"OPENMOD", "NOP", "JUMP", "JF", "PARAM", "OPCALL", "RET", "READ", "WRITE", "NONE"
 };
 
 /*
@@ -191,7 +195,7 @@ void RecursividadeNaoAdimitida();
 
 /* Variaveis globais para o codigo intermediario */
 
-quadrupla quadcorrente, quadaux;
+quadrupla quadcorrente, quadaux, quadaux2, quadaux3;
 modhead codintermed, modcorrente;
 int oper, numquadcorrente;
 operando opnd1, opnd2, result, opndaux;
@@ -235,6 +239,7 @@ struct infovariavel {
   int returnedTypes[5];
   int returnedType;
   lista *paramQueSobe;
+  quadrupla quad1, quad2;
 }
 
 %type       <infovar>        Variable
@@ -248,6 +253,8 @@ struct infovariavel {
 %type       <returnedType>  Statement ReturnStat ModHeader WhileStat IfStat RepeatStat ForStat  ElseStat
 
 %type       <paramQueSobe> Arguments ExprList
+
+%type       <nsubscr>           ReadList WriteList
 
 %token		<string> ID
 %token 		<string> CHARCT
@@ -426,6 +433,7 @@ Module          :   ModHeader ModBody {
                         {
                             Incompatibilidade ("Return indevido no escopo da funcao.");
                         }
+                        GeraQuadrupla(OPRET, opndidle, opndidle, opndidle, 0);
                     }
                     SetarEscopo("GLOBAL");
                 }
@@ -542,8 +550,24 @@ IfStat          :  {tabular ();} IF  {printf ("if ");} Expression {
                         if($4.tipo != LOGICO){
                             Esperado("Expressao logica no cabecalho do IF");
                         }
-                    }  THEN {printf ("then \n"); tab++;} Statement ElseStat
-                    {
+                    }  THEN {
+                        printf ("then \n");
+                        tab++;
+
+                        operando op;
+                        op.tipo = ROTOPND;
+                        op.atr.rotulo = quadaux;
+
+                        operando condition = $4.opnd;
+                        $<quad1>$ = GeraQuadrupla(OPJF, condition, opndidle, op, 0);
+                    } Statement {
+                        ($<quad1>7->result).atr.rotulo = GeraQuadrupla(OPNONE, opndidle, opndidle, opndidle, 0);
+
+                        operando op;
+                        op.tipo = ROTOPND;
+                        op.atr.rotulo = quadaux;
+                        $<quad2>$ = GeraQuadrupla(OPJUMP, $4.opnd, opndidle, op, 0);
+                    } ElseStat {
                         int bosta[5] ={0};
                         if ($8 < 5) {
                             if ($8 >= 0) {
@@ -558,19 +582,20 @@ IfStat          :  {tabular ();} IF  {printf ("if ");} Expression {
                             }
                         }
 
-                        if ($9 < 5) {
-                            if ($9 >= 0) {
-                                bosta[$9] = 1;
+                        if ($10 < 5) {
+                            if ($10 >= 0) {
+                                bosta[$10] = 1;
                             }
                         } else {
                             int i=0;
-                            int gambi = $9-5;
+                            int gambi = $10-5;
                             for (i=0; i<5; i++) {
                                 bosta[i] = (gambi%10 == 1 || bosta[i]==1) ? 1:0;
                                 gambi = gambi/10;
                             }
                         }
-                    $$ = (5 + (bosta[0]==1 ?1:0) + 10*(bosta[1]==1 ?1:0)+ 100*(bosta[2]==1 ?1:0)+1000*(bosta[3]==1 ?1:0)+10000*(bosta[4]==1 ?1:0));
+                      $$ = (5 + (bosta[0]==1 ?1:0) + 10*(bosta[1]==1 ?1:0)+ 100*(bosta[2]==1 ?1:0)+1000*(bosta[3]==1 ?1:0)+10000*(bosta[4]==1 ?1:0));
+                      ($<quad2>9->result).atr.rotulo = GeraQuadrupla(OPNONE, opndidle, opndidle, opndidle, 0);
                     }
                 ;
 
@@ -585,7 +610,26 @@ WhileStat       :   {tabular ();} WHILE  {printf ("while ");} Expression {
                         if($4.tipo != LOGICO){
                             Esperado("Expressao logica no cabecalho do WHILE");
                         }
-                    } DO {printf ("do \n");tab++;}  Statement {tab--; $$ = $8; }
+                    } DO {
+                        printf ("do \n");
+                        tab++;
+                        $<quad1>$ = GeraQuadrupla(OPNONE, opndidle, opndidle, opndidle, 0);
+
+                        operando opaux;
+                        opaux.tipo = ROTOPND;
+                        opaux.atr.rotulo = quadaux;
+                        $<quad2>$ = GeraQuadrupla(OPJF, $4.opnd, opndidle, opaux, 0);
+                    }  Statement {
+                        tab--;
+                        $$ = $8;
+
+                        operando op;
+                        op.tipo = ROTOPND;
+                        op.atr.rotulo = $<quad1>7;
+                        GeraQuadrupla(OPJUMP, $4.opnd, opndidle, op, 0);
+
+                        ($<quad2>7->result).atr.rotulo = GeraQuadrupla(OPNONE, opndidle, opndidle, opndidle, 0);
+                      }
                 ;
 
 
@@ -617,17 +661,31 @@ ForStat         :   {tabular ();} FOR  {printf ("for ");} Variable {
                         }   CLPAR {printf (")\n"); tab++; }  Statement {tab--; $$ = $20;}
                 ;
 
-ReadStat        :   READ {tabular(); printf ("read (");} OPPAR  ReadList  CLPAR  SCOLON {printf (");\n");}
+ReadStat        :   READ {tabular(); printf ("read (");} OPPAR  ReadList  CLPAR  SCOLON {
+                      printf (");\n");
+                      operando op;
+                      op.tipo = INTOPND;
+                      op.atr.valint = $4;
+                      op.isTemp = 0;
+                      GeraQuadrupla(OPREAD, op, opndidle, opndidle,0);
+                    }
                 ;
 
-ReadList        :   Variable
-                |   ReadList  COMMA {printf (",");} Variable
+ReadList        :   Variable {$$ = 1;}
+                |   ReadList  COMMA {printf (",");} Variable {$$ = $1 + 1;}
                 ;
 
-WriteStat       :   WRITE  OPPAR  { tabular ();printf ("write ( ");} WriteList  CLPAR  SCOLON {printf (");\n");}
+WriteStat       :   WRITE  OPPAR  { tabular ();printf ("write ( ");} WriteList  CLPAR  SCOLON {
+                      printf (");\n");
+                      operando op;
+                      op.tipo = INTOPND;
+                      op.atr.valint = $4;
+                      op.isTemp = 0;
+                      GeraQuadrupla(OPWRITE, op, opndidle, opndidle,0);
+                    }
                 ;
 
-WriteList       :   WriteElem  |  WriteList  COMMA {printf (", ");} WriteElem
+WriteList       :   WriteElem {$$ = 1;}  |  WriteList  COMMA {printf (", ");} WriteElem {$$ = $1 + 1;}
                 ;
 
 WriteElem       :   STRING {printf ("%s", $1);} |  Expression
@@ -678,6 +736,28 @@ CallStat        :   CALL  ID  OPPAR {
                                 }
                             }
                         }
+
+                        infoexpressao thisAux;
+                        thisAux.opnd.tipo = FUNCAO;
+                        thisAux.opnd.atr.simb = simb;
+                        thisAux.opnd.atr.simb->cadeia = $2;
+
+                        operando op;
+                        op.tipo = FUNCAO;
+                        op.atr.simb = simb;
+                        op.isTemp = 0;
+
+                        operando op2;
+                        op2.tipo = INTOPND;
+                        op2.atr.valint = tamanhoDoSubido;
+                        op2.isTemp = 0;
+
+                        operando result;
+                        result.tipo = VAROPND;
+                        result.atr.simb = NovaTemp(FUNCVOID);
+                        result.isTemp = 1;
+                        GeraQuadrupla(OPCALL, op, op2, result, 1);
+
                     }
                 ;
 
@@ -685,8 +765,16 @@ Arguments       :  {$$ = NULL;}
                 |  ExprList {$$ = $1;}
                 ;
 
-ReturnStat      :   RETURN SCOLON {tabular();printf ("return ;\n"); $$ = 0;}
-                |   RETURN {tabular();printf ("return ");} Expression SCOLON {$$ = $3.tipo; printf (";\n");}
+ReturnStat      :   RETURN SCOLON {
+                      tabular();
+                      printf ("return ;\n");
+                      $$ = 0;
+                      GeraQuadrupla(OPRET, opndidle, opndidle, opndidle, 0);
+                    }
+                |   RETURN {tabular();printf ("return ");} Expression SCOLON {
+                      $$ = $3.tipo;
+                      printf (";\n");
+                    }
                 ;
 
 AssignStat      :   {tabular ();} Variable
@@ -713,7 +801,7 @@ AssignStat      :   {tabular ();} Variable
 ExprList		:	Expression {
                 $$ = (lista*) malloc (sizeof(lista));
                 $$->tipo = $1.tipo; $$->prox = NULL;
-                GeraQuadrupla(OPATRIB, $1.opnd, opndidle, opndidle, 0);
+                GeraQuadrupla(PARAM, $1.opnd, opndidle, opndidle, 0);
               }
 				|	ExprList  COMMA {printf (", ");}  Expression {
                         $$ = $1;
@@ -791,7 +879,16 @@ AuxExpr3        :   AuxExpr4 { $$ = $1;}
                         $$.opnd.tipo = VAROPND;
                         $$.opnd.atr.simb = NovaTemp($$.tipo);
                         $$.opnd.isTemp = 1;
-                        GeraQuadrupla($2, $1.opnd, $4.opnd, $$.opnd, 1);
+                        int operation;
+                        switch ($2) {
+                            case LT: operation = OPLT; break;
+                            case LE: operation = OPLE; break;
+                            case EQ: operation = OPEQ; break;
+                            case NE: operation = OPNE; break;
+                            case GT: operation = OPGT; break;
+                            case GE: operation = OPGE; break;
+                        }
+                        GeraQuadrupla(operation, $1.opnd, $4.opnd, $$.opnd, 1);
                     }
                 ;
 
@@ -1105,9 +1202,11 @@ void ImprimeQuadruplas (void) {
     	quadrupla prox;
     };
     */
+    int line = 1;
     for (quad = head->listquad->prox; quad != NULL; quad = quad->prox) {
 
-      printf("    %s, ", nomeoperquad[quad->oper]);
+      printf("    %d) %s, ", line, nomeoperquad[quad->oper]);
+      line++;
 
       if ((quad->opnd1).tipo == 0) {
         printf("(IDLE), ");
@@ -1195,6 +1294,9 @@ void ImprimeQuadruplas (void) {
         }
         else if ((quad->result).tipo == LOGICOPND) {
           printf(", %d)\n", (quad->result).atr.vallogic);
+        }
+        else if ((quad->result).tipo == ROTOPND) {
+          printf(", %d)\n", (quad->result).atr.rotulo->num);
         }
         else {
           printf(")\n");
