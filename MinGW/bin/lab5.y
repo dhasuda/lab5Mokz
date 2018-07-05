@@ -452,6 +452,11 @@ ModHeader       :   Type ID OPPAR  CLPAR {
 
                         simb = ProcuraSimb ($2, "GLOBAL");
                         InicCodIntermMod(simb);
+                        operando ops;
+                        ops.tipo = MODOPND;
+                        ops.atr.modulo = modcorrente;
+                        ops.isTemp = 0;
+                        GeraQuadrupla(OPENMOD, ops, opndidle, opndidle, 0);
                         }
                 |   Type ID OPPAR {
                         simb = ProcuraSimb ($2, "GLOBAL");
@@ -464,6 +469,11 @@ ModHeader       :   Type ID OPPAR  CLPAR {
 
                         simb = ProcuraSimb ($2, "GLOBAL");
                         InicCodIntermMod(simb);
+                        operando ops;
+                        ops.tipo = MODOPND;
+                        ops.atr.modulo = modcorrente;
+                        ops.isTemp = 0;
+                        GeraQuadrupla(OPENMOD, ops, opndidle, opndidle, 0);
 
                         } ParamList  CLPAR {printf (")\n"); }
                 ;
