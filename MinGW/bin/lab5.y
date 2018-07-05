@@ -633,32 +633,71 @@ WhileStat       :   {tabular ();} WHILE  {printf ("while ");} Expression {
                 ;
 
 
-RepeatStat      :   {tabular ();} REPEAT  {printf ("repeat \n");tab++;} Statement WHILE  {tab--;tabular();printf ("while "); $$ = $4;} Expression{
+RepeatStat      :   {tabular ();} REPEAT  {
+                        printf ("repeat \n");
+                        tab++;
+                        $<quad1>$ = GeraQuadrupla(OPNONE, opndidle, opndidle, opndidle, 0);
+                      }
+                      Statement WHILE  {tab--;tabular();printf ("while "); $$ = $4;} Expression{
                         if($7.tipo != LOGICO){
                             Esperado("Expressao logica no enncerramento do REPEAT");
                         }
+
+                        operando op;
+                        op.tipo = ROTOPND;
+                        op.atr.rotulo = $<quad1>3;
+                        GeraQuadrupla(OPJUMP, $7.opnd, opndidle, op, 0);
+
                     }  SCOLON {printf (";\n");}
                 ;
 
-ForStat         :   {tabular ();} FOR  {printf ("for ");} Variable {
+ForStat         :   {tabular ();}
+                    FOR  {printf ("for ");}
+                    Variable {
                             if ($4.simb == NULL) NaoDeclarado ("Variavel de controle do For");
                             else if($4.simb->array == VERDADE || ($4.simb->tvar != CARACTERE && $4.simb->tvar != INTEIRO)) {
                                 Esperado("Variavel de controle do FOR escalar inteira ou escalar caractere");
                             }
-                        } OPPAR  {printf ("( ");} AuxExpr4{
+                        }
+                    OPPAR  {printf ("( ");}
+                    AuxExpr4 {
                             if($8.tipo != INTEIRO && $8.tipo != CARACTERE){
                                 Esperado("Primeira expressao do FOR inteira ou caractere");
                             }
-                        }   COLON  {printf (": ");}
-                    Expression{
+                            operando resultOp;
+                            resultOp.isTemp = 0;
+                            resultOp.tipo = VAROPND;
+                            resultOp.atr.simb = $4.simb;
+                            GeraQuadrupla(OPATRIB, $8.opnd, opndidle, resultOp, 0);
+                        }
+                    COLON  {printf (": ");}
+                    Expression {
                             if($12.tipo != LOGICO){
                                 Esperado("Segunda expressao do FOR logica");
                             }
-                        }  COLON {printf (": ");}   AuxExpr4{
+                            // $<quad1>$ = GeraQuadrupla(OPNONE, opndidle, opndidle, opndidle, 0);
+
+                            operando opaux;
+                            opaux.tipo = ROTOPND;
+                            opaux.atr.rotulo = quadaux;
+                            $<quad2>$ = GeraQuadrupla(OPJF, $12.opnd, opndidle, opaux, 0);
+
+                        }
+                        COLON {printf (": ");}   AuxExpr4{
                         if($16.tipo != INTEIRO && $16.tipo != CARACTERE){
                             Esperado("Terceira expressao do FOR inteira ou caractere");
                             }
-                        }   CLPAR {printf (")\n"); tab++; }  Statement {tab--; $$ = $20;}
+                        }   CLPAR {printf (")\n"); tab++; }  Statement {
+                            tab--;
+                            $$ = $20;
+
+                            operando op;
+                            op.tipo = ROTOPND;
+                            op.atr.rotulo = $<quad2>13;
+                            GeraQuadrupla(OPJUMP, $12.opnd, opndidle, op, 0);
+
+                            ($<quad2>13->result).atr.rotulo = GeraQuadrupla(OPNONE, opndidle, opndidle, opndidle, 0);
+                          }
                 ;
 
 ReadStat        :   READ {tabular(); printf ("read (");} OPPAR  ReadList  CLPAR  SCOLON {

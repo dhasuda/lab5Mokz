@@ -795,15 +795,15 @@ static const yytype_uint16 yyrline[] =
      489,   489,   501,   501,   505,   505,   509,   515,   536,   537,
      538,   539,   540,   541,   542,   543,   544,   545,   546,   549,
      549,   549,   553,   563,   549,   603,   604,   604,   609,   609,
-     609,   613,   609,   636,   636,   636,   636,   636,   643,   643,
-     643,   648,   648,   652,   653,   657,   657,   661,   643,   664,
-     664,   674,   675,   675,   678,   678,   688,   688,   688,   691,
-     691,   694,   694,   764,   765,   768,   774,   774,   780,   781,
-     782,   780,   801,   806,   806,   819,   820,   820,   831,   832,
-     832,   843,   844,   844,   856,   857,   857,   895,   896,   896,
-     918,   919,   919,   961,   968,   974,   980,   986,   992,   998,
-     998,  1008,  1008,  1017,  1027,  1027,  1055,  1056,  1056,  1059,
-    1065,  1066,  1069,  1069,  1075,  1075,  1080,  1094,  1080
+     609,   613,   609,   636,   636,   641,   641,   636,   654,   655,
+     656,   662,   663,   673,   674,   686,   686,   690,   654,   703,
+     703,   713,   714,   714,   717,   717,   727,   727,   727,   730,
+     730,   733,   733,   803,   804,   807,   813,   813,   819,   820,
+     821,   819,   840,   845,   845,   858,   859,   859,   870,   871,
+     871,   882,   883,   883,   895,   896,   896,   934,   935,   935,
+     957,   958,   958,  1000,  1007,  1013,  1019,  1025,  1031,  1037,
+    1037,  1047,  1047,  1056,  1066,  1066,  1094,  1095,  1095,  1098,
+    1104,  1105,  1108,  1108,  1114,  1114,  1119,  1133,  1119
 };
 #endif
 
@@ -2401,40 +2401,50 @@ yyreduce:
 
   case 74:
 #line 636 "lab5.y"
-    {printf ("repeat \n");tab++;}
+    {
+                        printf ("repeat \n");
+                        tab++;
+                        (yyval.quad1) = GeraQuadrupla(OPNONE, opndidle, opndidle, opndidle, 0);
+                      }
     break;
 
   case 75:
-#line 636 "lab5.y"
+#line 641 "lab5.y"
     {tab--;tabular();printf ("while "); (yyval.returnedType) = (yyvsp[(4) - (5)].returnedType);}
     break;
 
   case 76:
-#line 636 "lab5.y"
+#line 641 "lab5.y"
     {
                         if((yyvsp[(7) - (7)].infoexpr).tipo != LOGICO){
                             Esperado("Expressao logica no enncerramento do REPEAT");
                         }
+
+                        operando op;
+                        op.tipo = ROTOPND;
+                        op.atr.rotulo = (yyvsp[(3) - (7)].quad1);
+                        GeraQuadrupla(OPJUMP, (yyvsp[(7) - (7)].infoexpr).opnd, opndidle, op, 0);
+
                     }
     break;
 
   case 77:
-#line 640 "lab5.y"
+#line 651 "lab5.y"
     {printf (";\n");}
     break;
 
   case 78:
-#line 643 "lab5.y"
+#line 654 "lab5.y"
     {tabular ();}
     break;
 
   case 79:
-#line 643 "lab5.y"
+#line 655 "lab5.y"
     {printf ("for ");}
     break;
 
   case 80:
-#line 643 "lab5.y"
+#line 656 "lab5.y"
     {
                             if ((yyvsp[(4) - (4)].infovar).simb == NULL) NaoDeclarado ("Variavel de controle do For");
                             else if((yyvsp[(4) - (4)].infovar).simb->array == VERDADE || ((yyvsp[(4) - (4)].infovar).simb->tvar != CARACTERE && (yyvsp[(4) - (4)].infovar).simb->tvar != INTEIRO)) {
@@ -2444,40 +2454,52 @@ yyreduce:
     break;
 
   case 81:
-#line 648 "lab5.y"
+#line 662 "lab5.y"
     {printf ("( ");}
     break;
 
   case 82:
-#line 648 "lab5.y"
+#line 663 "lab5.y"
     {
                             if((yyvsp[(8) - (8)].infoexpr).tipo != INTEIRO && (yyvsp[(8) - (8)].infoexpr).tipo != CARACTERE){
                                 Esperado("Primeira expressao do FOR inteira ou caractere");
                             }
+                            operando resultOp;
+                            resultOp.isTemp = 0;
+                            resultOp.tipo = VAROPND;
+                            resultOp.atr.simb = (yyvsp[(4) - (8)].infovar).simb;
+                            GeraQuadrupla(OPATRIB, (yyvsp[(8) - (8)].infoexpr).opnd, opndidle, resultOp, 0);
                         }
     break;
 
   case 83:
-#line 652 "lab5.y"
+#line 673 "lab5.y"
     {printf (": ");}
     break;
 
   case 84:
-#line 653 "lab5.y"
+#line 674 "lab5.y"
     {
                             if((yyvsp[(12) - (12)].infoexpr).tipo != LOGICO){
                                 Esperado("Segunda expressao do FOR logica");
                             }
+                            // $<quad1>$ = GeraQuadrupla(OPNONE, opndidle, opndidle, opndidle, 0);
+
+                            operando opaux;
+                            opaux.tipo = ROTOPND;
+                            opaux.atr.rotulo = quadaux;
+                            (yyval.quad2) = GeraQuadrupla(OPJF, (yyvsp[(12) - (12)].infoexpr).opnd, opndidle, opaux, 0);
+
                         }
     break;
 
   case 85:
-#line 657 "lab5.y"
+#line 686 "lab5.y"
     {printf (": ");}
     break;
 
   case 86:
-#line 657 "lab5.y"
+#line 686 "lab5.y"
     {
                         if((yyvsp[(16) - (16)].infoexpr).tipo != INTEIRO && (yyvsp[(16) - (16)].infoexpr).tipo != CARACTERE){
                             Esperado("Terceira expressao do FOR inteira ou caractere");
@@ -2486,22 +2508,32 @@ yyreduce:
     break;
 
   case 87:
-#line 661 "lab5.y"
+#line 690 "lab5.y"
     {printf (")\n"); tab++; }
     break;
 
   case 88:
-#line 661 "lab5.y"
-    {tab--; (yyval.returnedType) = (yyvsp[(20) - (20)].returnedType);}
+#line 690 "lab5.y"
+    {
+                            tab--;
+                            (yyval.returnedType) = (yyvsp[(20) - (20)].returnedType);
+
+                            operando op;
+                            op.tipo = ROTOPND;
+                            op.atr.rotulo = (yyvsp[(13) - (20)].quad2);
+                            GeraQuadrupla(OPJUMP, (yyvsp[(12) - (20)].infoexpr).opnd, opndidle, op, 0);
+
+                            ((yyvsp[(13) - (20)].quad2)->result).atr.rotulo = GeraQuadrupla(OPNONE, opndidle, opndidle, opndidle, 0);
+                          }
     break;
 
   case 89:
-#line 664 "lab5.y"
+#line 703 "lab5.y"
     {tabular(); printf ("read (");}
     break;
 
   case 90:
-#line 664 "lab5.y"
+#line 703 "lab5.y"
     {
                       printf (");\n");
                       operando op;
@@ -2513,27 +2545,27 @@ yyreduce:
     break;
 
   case 91:
-#line 674 "lab5.y"
+#line 713 "lab5.y"
     {(yyval.nsubscr) = 1;}
     break;
 
   case 92:
-#line 675 "lab5.y"
+#line 714 "lab5.y"
     {printf (",");}
     break;
 
   case 93:
-#line 675 "lab5.y"
+#line 714 "lab5.y"
     {(yyval.nsubscr) = (yyvsp[(1) - (4)].nsubscr) + 1;}
     break;
 
   case 94:
-#line 678 "lab5.y"
+#line 717 "lab5.y"
     { tabular ();printf ("write ( ");}
     break;
 
   case 95:
-#line 678 "lab5.y"
+#line 717 "lab5.y"
     {
                       printf (");\n");
                       operando op;
@@ -2545,27 +2577,27 @@ yyreduce:
     break;
 
   case 96:
-#line 688 "lab5.y"
+#line 727 "lab5.y"
     {(yyval.nsubscr) = 1;}
     break;
 
   case 97:
-#line 688 "lab5.y"
+#line 727 "lab5.y"
     {printf (", ");}
     break;
 
   case 98:
-#line 688 "lab5.y"
+#line 727 "lab5.y"
     {(yyval.nsubscr) = (yyvsp[(1) - (4)].nsubscr) + 1;}
     break;
 
   case 99:
-#line 691 "lab5.y"
+#line 730 "lab5.y"
     {printf ("%s", (yyvsp[(1) - (1)].string));}
     break;
 
   case 101:
-#line 694 "lab5.y"
+#line 733 "lab5.y"
     {
                         tabular();
                         printf("call %s(",(yyvsp[(2) - (3)].string));
@@ -2579,7 +2611,7 @@ yyreduce:
     break;
 
   case 102:
-#line 703 "lab5.y"
+#line 742 "lab5.y"
     {
                         printf (");\n");
                         simb = ProcuraSimb ((yyvsp[(2) - (7)].string), "GLOBAL");
@@ -2642,17 +2674,17 @@ yyreduce:
     break;
 
   case 103:
-#line 764 "lab5.y"
+#line 803 "lab5.y"
     {(yyval.paramQueSobe) = NULL;}
     break;
 
   case 104:
-#line 765 "lab5.y"
+#line 804 "lab5.y"
     {(yyval.paramQueSobe) = (yyvsp[(1) - (1)].paramQueSobe);}
     break;
 
   case 105:
-#line 768 "lab5.y"
+#line 807 "lab5.y"
     {
                       tabular();
                       printf ("return ;\n");
@@ -2662,12 +2694,12 @@ yyreduce:
     break;
 
   case 106:
-#line 774 "lab5.y"
+#line 813 "lab5.y"
     {tabular();printf ("return ");}
     break;
 
   case 107:
-#line 774 "lab5.y"
+#line 813 "lab5.y"
     {
                       (yyval.returnedType) = (yyvsp[(3) - (4)].infoexpr).tipo;
                       printf (";\n");
@@ -2675,22 +2707,22 @@ yyreduce:
     break;
 
   case 108:
-#line 780 "lab5.y"
+#line 819 "lab5.y"
     {tabular ();}
     break;
 
   case 109:
-#line 781 "lab5.y"
+#line 820 "lab5.y"
     { if  ((yyvsp[(2) - (2)].infovar).simb != NULL) (yyvsp[(2) - (2)].infovar).simb->inic = (yyvsp[(2) - (2)].infovar).simb->ref = VERDADE;}
     break;
 
   case 110:
-#line 782 "lab5.y"
+#line 821 "lab5.y"
     {printf (":= ");}
     break;
 
   case 111:
-#line 783 "lab5.y"
+#line 822 "lab5.y"
     {
                         printf (";\n");
                         if ((yyvsp[(2) - (7)].infovar).simb != NULL) {
@@ -2709,7 +2741,7 @@ yyreduce:
     break;
 
   case 112:
-#line 801 "lab5.y"
+#line 840 "lab5.y"
     {
                 (yyval.paramQueSobe) = (lista*) malloc (sizeof(lista));
                 (yyval.paramQueSobe)->tipo = (yyvsp[(1) - (1)].infoexpr).tipo; (yyval.paramQueSobe)->prox = NULL;
@@ -2718,12 +2750,12 @@ yyreduce:
     break;
 
   case 113:
-#line 806 "lab5.y"
+#line 845 "lab5.y"
     {printf (", ");}
     break;
 
   case 114:
-#line 806 "lab5.y"
+#line 845 "lab5.y"
     {
                         (yyval.paramQueSobe) = (yyvsp[(1) - (4)].paramQueSobe);
                         lista *p = (yyval.paramQueSobe);
@@ -2738,17 +2770,17 @@ yyreduce:
     break;
 
   case 115:
-#line 819 "lab5.y"
+#line 858 "lab5.y"
     { (yyval.infoexpr) = (yyvsp[(1) - (1)].infoexpr);}
     break;
 
   case 116:
-#line 820 "lab5.y"
+#line 859 "lab5.y"
     {printf ("|| ");}
     break;
 
   case 117:
-#line 820 "lab5.y"
+#line 859 "lab5.y"
     {
                         if ((yyvsp[(1) - (4)].infoexpr).tipo != LOGICO || (yyvsp[(4) - (4)].infoexpr).tipo != LOGICO)
                             Incompatibilidade ("Operando improprio para operador or");
@@ -2762,17 +2794,17 @@ yyreduce:
     break;
 
   case 118:
-#line 831 "lab5.y"
+#line 870 "lab5.y"
     { (yyval.infoexpr) = (yyvsp[(1) - (1)].infoexpr);}
     break;
 
   case 119:
-#line 832 "lab5.y"
+#line 871 "lab5.y"
     {printf ("&& ");}
     break;
 
   case 120:
-#line 832 "lab5.y"
+#line 871 "lab5.y"
     {
                         if ((yyvsp[(1) - (4)].infoexpr).tipo != LOGICO || (yyvsp[(4) - (4)].infoexpr).tipo != LOGICO)
                             Incompatibilidade ("Operando improprio para operador and");
@@ -2786,17 +2818,17 @@ yyreduce:
     break;
 
   case 121:
-#line 843 "lab5.y"
+#line 882 "lab5.y"
     { (yyval.infoexpr) = (yyvsp[(1) - (1)].infoexpr);}
     break;
 
   case 122:
-#line 844 "lab5.y"
+#line 883 "lab5.y"
     {printf ("! ");}
     break;
 
   case 123:
-#line 844 "lab5.y"
+#line 883 "lab5.y"
     {
                         if ((yyvsp[(3) - (3)].infoexpr).tipo != LOGICO)
                             Incompatibilidade ("Operando improprio para operador not");
@@ -2810,12 +2842,12 @@ yyreduce:
     break;
 
   case 124:
-#line 856 "lab5.y"
+#line 895 "lab5.y"
     { (yyval.infoexpr) = (yyvsp[(1) - (1)].infoexpr);}
     break;
 
   case 125:
-#line 857 "lab5.y"
+#line 896 "lab5.y"
     {
                         switch ((yyvsp[(2) - (2)].atr)) {
                             case LT: printf ("< "); break;
@@ -2829,7 +2861,7 @@ yyreduce:
     break;
 
   case 126:
-#line 866 "lab5.y"
+#line 905 "lab5.y"
     {
                         switch ((yyvsp[(2) - (4)].atr)) {
                             case LT: case LE: case GT: case GE:
@@ -2860,12 +2892,12 @@ yyreduce:
     break;
 
   case 127:
-#line 895 "lab5.y"
+#line 934 "lab5.y"
     { (yyval.infoexpr) = (yyvsp[(1) - (1)].infoexpr);}
     break;
 
   case 128:
-#line 896 "lab5.y"
+#line 935 "lab5.y"
     {
                         switch ((yyvsp[(2) - (2)].atr)) {
                             case PLUS: printf ("+ "); break;
@@ -2875,7 +2907,7 @@ yyreduce:
     break;
 
   case 129:
-#line 901 "lab5.y"
+#line 940 "lab5.y"
     {
                         if ((yyvsp[(1) - (4)].infoexpr).tipo != INTEIRO && (yyvsp[(1) - (4)].infoexpr).tipo != REAL && (yyvsp[(1) - (4)].infoexpr).tipo != CARACTERE || (yyvsp[(4) - (4)].infoexpr).tipo != INTEIRO && (yyvsp[(4) - (4)].infoexpr).tipo != REAL && (yyvsp[(4) - (4)].infoexpr).tipo != CARACTERE)
                             Incompatibilidade ("Operando improprio para operador aritmetico");
@@ -2894,12 +2926,12 @@ yyreduce:
     break;
 
   case 130:
-#line 918 "lab5.y"
+#line 957 "lab5.y"
     { (yyval.infoexpr) = (yyvsp[(1) - (1)].infoexpr);}
     break;
 
   case 131:
-#line 919 "lab5.y"
+#line 958 "lab5.y"
     {
                         switch ((yyvsp[(2) - (2)].atr)) {
                             case MULT:
@@ -2916,7 +2948,7 @@ yyreduce:
     break;
 
   case 132:
-#line 931 "lab5.y"
+#line 970 "lab5.y"
     {
                         switch ((yyvsp[(2) - (4)].atr)) {
                             case MULT: case DIV:
@@ -2948,7 +2980,7 @@ yyreduce:
     break;
 
   case 133:
-#line 961 "lab5.y"
+#line 1000 "lab5.y"
     {
                         if  ((yyvsp[(1) - (1)].infovar).simb != NULL) {
                             (yyvsp[(1) - (1)].infovar).simb->ref  =  VERDADE;
@@ -2959,7 +2991,7 @@ yyreduce:
     break;
 
   case 134:
-#line 968 "lab5.y"
+#line 1007 "lab5.y"
     {
                         printf ("%d ", (yyvsp[(1) - (1)].valor));
                         (yyval.infoexpr).tipo = INTEIRO;
@@ -2969,7 +3001,7 @@ yyreduce:
     break;
 
   case 135:
-#line 974 "lab5.y"
+#line 1013 "lab5.y"
     {
                         printf ("%g ", (yyvsp[(1) - (1)].valreal));
                         (yyval.infoexpr).tipo = REAL;
@@ -2979,7 +3011,7 @@ yyreduce:
     break;
 
   case 136:
-#line 980 "lab5.y"
+#line 1019 "lab5.y"
     {
                         printf ("\'%s\' ", (yyvsp[(1) - (1)].string));
                         (yyval.infoexpr).tipo = CARACTERE;
@@ -2989,7 +3021,7 @@ yyreduce:
     break;
 
   case 137:
-#line 986 "lab5.y"
+#line 1025 "lab5.y"
     {
                         printf ("true ");
                         (yyval.infoexpr).tipo = LOGICO;
@@ -2999,7 +3031,7 @@ yyreduce:
     break;
 
   case 138:
-#line 992 "lab5.y"
+#line 1031 "lab5.y"
     {
                         printf ("false ");
                         (yyval.infoexpr).tipo = LOGICO;
@@ -3009,12 +3041,12 @@ yyreduce:
     break;
 
   case 139:
-#line 998 "lab5.y"
+#line 1037 "lab5.y"
     {printf ("~ ");}
     break;
 
   case 140:
-#line 998 "lab5.y"
+#line 1037 "lab5.y"
     {
                         if ((yyvsp[(3) - (3)].infoexpr).tipo != INTEIRO && (yyvsp[(3) - (3)].infoexpr).tipo != REAL && (yyvsp[(3) - (3)].infoexpr).tipo != CARACTERE)
                             Incompatibilidade  ("Operando improprio para menos unario");
@@ -3028,14 +3060,14 @@ yyreduce:
     break;
 
   case 141:
-#line 1008 "lab5.y"
+#line 1047 "lab5.y"
     {
                         printf ("( ");
                   }
     break;
 
   case 142:
-#line 1011 "lab5.y"
+#line 1050 "lab5.y"
     {
                       printf (") ");
                       (yyval.infoexpr) = (yyvsp[(3) - (4)].infoexpr);
@@ -3045,7 +3077,7 @@ yyreduce:
     break;
 
   case 143:
-#line 1017 "lab5.y"
+#line 1056 "lab5.y"
     {
                             // $$ = $1;
                             (yyval.infoexpr).tipo = NAOVAR;
@@ -3057,7 +3089,7 @@ yyreduce:
     break;
 
   case 144:
-#line 1027 "lab5.y"
+#line 1066 "lab5.y"
     {
                         printf ("%s ", (yyvsp[(1) - (1)].string));
                         simb = ProcuraSimb ((yyvsp[(1) - (1)].string), escopocorrente);
@@ -3069,7 +3101,7 @@ yyreduce:
     break;
 
   case 145:
-#line 1034 "lab5.y"
+#line 1073 "lab5.y"
     {
                                     (yyval.infovar).simb = (yyvsp[(2) - (3)].simb);
                                     if ((yyval.infovar).simb != NULL) {
@@ -3092,22 +3124,22 @@ yyreduce:
     break;
 
   case 146:
-#line 1055 "lab5.y"
+#line 1094 "lab5.y"
     {(yyval.nsubscr) = 0;}
     break;
 
   case 147:
-#line 1056 "lab5.y"
+#line 1095 "lab5.y"
     {printf ("[ ");}
     break;
 
   case 148:
-#line 1057 "lab5.y"
+#line 1096 "lab5.y"
     {printf ("] "); (yyval.nsubscr) = (yyvsp[(3) - (4)].nsubscr); }
     break;
 
   case 149:
-#line 1060 "lab5.y"
+#line 1099 "lab5.y"
     {
                         (yyval.nsubscr) = 1;
                         if ((yyvsp[(1) - (1)].infoexpr).tipo != INTEIRO && (yyvsp[(1) - (1)].infoexpr).tipo != CARACTERE)
@@ -3116,40 +3148,40 @@ yyreduce:
     break;
 
   case 150:
-#line 1065 "lab5.y"
+#line 1104 "lab5.y"
     {(yyval.nsubscr) = 2;}
     break;
 
   case 151:
-#line 1066 "lab5.y"
+#line 1105 "lab5.y"
     {(yyval.nsubscr) =3;}
     break;
 
   case 152:
-#line 1069 "lab5.y"
+#line 1108 "lab5.y"
     {printf (", ");}
     break;
 
   case 153:
-#line 1069 "lab5.y"
+#line 1108 "lab5.y"
     { if ((yyvsp[(1) - (4)].infoexpr).tipo != INTEIRO && (yyvsp[(1) - (4)].infoexpr).tipo != CARACTERE ||
                                                                     (yyvsp[(4) - (4)].infoexpr).tipo != INTEIRO && (yyvsp[(4) - (4)].infoexpr).tipo != CARACTERE)
                                                                     Incompatibilidade ("Tipo inadequado para subscrito");   }
     break;
 
   case 154:
-#line 1075 "lab5.y"
+#line 1114 "lab5.y"
     {printf (", ");}
     break;
 
   case 155:
-#line 1075 "lab5.y"
+#line 1114 "lab5.y"
     { if ((yyvsp[(4) - (4)].infoexpr).tipo != INTEIRO && (yyvsp[(4) - (4)].infoexpr).tipo != CARACTERE)
                         Incompatibilidade ("Tipo inadequado para subscrito"); }
     break;
 
   case 156:
-#line 1080 "lab5.y"
+#line 1119 "lab5.y"
     {
                             simb = ProcuraSimb ((yyvsp[(1) - (1)].string), "GLOBAL");
                             if (simb == NULL) NaoDeclarado ((yyvsp[(1) - (1)].string));
@@ -3167,12 +3199,12 @@ yyreduce:
     break;
 
   case 157:
-#line 1094 "lab5.y"
+#line 1133 "lab5.y"
     {printf ("(");}
     break;
 
   case 158:
-#line 1095 "lab5.y"
+#line 1134 "lab5.y"
     {
                         printf (")");
                         simb = ProcuraSimb((yyvsp[(1) - (6)].string), "GLOBAL");
@@ -3232,7 +3264,7 @@ yyreduce:
 
 
 /* Line 1267 of yacc.c.  */
-#line 3236 "y.tab.c"
+#line 3268 "y.tab.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -3446,7 +3478,7 @@ yyreturn:
 }
 
 
-#line 1152 "lab5.y"
+#line 1191 "lab5.y"
 
 #include "lex.yy.c"
 
