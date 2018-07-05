@@ -330,7 +330,7 @@ Prog            :   {
                     }
                     Decls  {SetarEscopo("GLOBAL");} ModList MainMod CLTRIP  {
                         printf ("}}}\n");
-
+                        GeraQuadrupla(OPRET, opndidle, opndidle, opndidle, 0);
                         VerificaInicRef ();
                         ImprimeTabSimb ();
                         ImprimeQuadruplas();
@@ -823,6 +823,7 @@ ReturnStat      :   RETURN SCOLON {
                 |   RETURN {tabular();printf ("return ");} Expression SCOLON {
                       $$ = $3.tipo;
                       printf (";\n");
+                      GeraQuadrupla(OPRET, $3.opnd, opndidle, opndidle, 0);
                     }
                 ;
 
