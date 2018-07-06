@@ -2776,7 +2776,7 @@ yyreduce:
                         p->prox = (lista*) malloc (sizeof(lista));
                         p->prox->tipo = (yyvsp[(4) - (4)].infoexpr).tipo;
                         p->prox->prox = NULL;
-                        GeraQuadrupla(OPATRIB, (yyvsp[(4) - (4)].infoexpr).opnd, opndidle, opndidle, 0);
+                        GeraQuadrupla(PARAM, (yyvsp[(4) - (4)].infoexpr).opnd, opndidle, opndidle, 0);
                     }
     break;
 
@@ -3228,6 +3228,7 @@ yyreduce:
                             int deuRuim = 0;
                             int tamanhoDoSubido = 0;
 
+                            (yyval.infoexpr).tipo = simb->tvar;
                             (yyval.infoexpr).opnd.tipo = FUNCAO;
                             (yyval.infoexpr).opnd.atr.simb = simb;
                             (yyval.infoexpr).opnd.atr.simb->cadeia = (yyvsp[(1) - (6)].string);
@@ -3275,7 +3276,7 @@ yyreduce:
 
 
 /* Line 1267 of yacc.c.  */
-#line 3279 "y.tab.c"
+#line 3280 "y.tab.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -3489,7 +3490,7 @@ yyreturn:
 }
 
 
-#line 1202 "lab5.y"
+#line 1203 "lab5.y"
 
 #include "lex.yy.c"
 

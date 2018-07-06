@@ -862,7 +862,7 @@ ExprList		:	Expression {
                         p->prox = (lista*) malloc (sizeof(lista));
                         p->prox->tipo = $4.tipo;
                         p->prox->prox = NULL;
-                        GeraQuadrupla(OPATRIB, $4.opnd, opndidle, opndidle, 0);
+                        GeraQuadrupla(PARAM, $4.opnd, opndidle, opndidle, 0);
                     }
 				;
 
@@ -1154,6 +1154,7 @@ FuncCall        :       ID  {
                             int deuRuim = 0;
                             int tamanhoDoSubido = 0;
 
+                            $$.tipo = simb->tvar;
                             $$.opnd.tipo = FUNCAO;
                             $$.opnd.atr.simb = simb;
                             $$.opnd.atr.simb->cadeia = $1;
