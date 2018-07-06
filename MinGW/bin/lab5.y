@@ -444,13 +444,16 @@ Module          :   ModHeader ModBody {
 ModHeader       :   Type ID OPPAR  CLPAR {
                         simb = ProcuraSimb ($2, "GLOBAL");
                         if(simb != NULL) DeclaracaoRepetida ($2);
+
                         else { InsereSimb($2, IDFUNC, tipocorrente); }
+                        //printf ("**** TIPO CORRENTE ****:%s, %d", $2,tipocorrente);
 
                         printf ("%s ()\n", $2);
                         $$ = tipocorrente;
                         SetarEscopo($2);
 
                         simb = ProcuraSimb ($2, "GLOBAL");
+                        printf(" ****** %s", simb->cadeia);
                         InicCodIntermMod(simb);
                         operando ops;
                         ops.tipo = MODOPND;
@@ -500,10 +503,11 @@ ModBody         :   Decls  Stats {$$[0] = $2[0]; $$[1] = $2[1]; $$[2] = $2[2]; $
 MainMod         :   MAIN {
                       printf("main\n");
 
-                      SetarEscopo("MAIN");
-
-                      simb = InsereSimb("MAIN", "GLOBAL", NAOVAR);
+                      
+                    SetarEscopo("GLOBAL");
+                      simb = InsereSimb("MAIN", IDFUNC, NAOVAR);
                       InicCodIntermMod(simb);
+                    SetarEscopo("MAIN");
 
                     } ModBody {
                       SetarEscopo("GLOBAL");
@@ -964,7 +968,7 @@ AuxExpr4        :   Term { $$ = $1;}
                     }
                 ;
 
-Term            :   Factor { $$ = $1; }
+Term            :   Factor { $$ = $1;}
                 |   Term  MULTOP  {
                         switch ($2) {
                             case MULT:
@@ -1069,7 +1073,7 @@ Factor          :   Variable  {
                             $$.opnd.tipo = FUNCAO;
                             // $$.opnd.atr.simb->cadeia = $$.opn;
                             $$.opnd.isTemp = 0;
-                            // printf("********************** tipo=%s **********************", $1.opnd.atr.simb->cadeia);
+                            //printf("********************** tipo=%s **********************", codintermed->prox->prox->modname->cadeia);
                     }
                 ;
 
@@ -1134,6 +1138,7 @@ FuncCall        :       ID  {
                             else if ( strcmp(simb->cadeia, escopocorrente) == 0) RecursividadeNaoAdimitida();
                             else{
                                 $$.tipo = simb->tvar;
+                                printf("- O tipo do FuncCall e: %d -",$$.tipo);
                                 $$.opnd.tipo = FUNCAO;
                                 $$.opnd.atr.simb = simb;
                                 $$.opnd.atr.simb->cadeia = $1;
@@ -1149,10 +1154,13 @@ FuncCall        :       ID  {
                         else if (simb->tvar == FUNCVOID) {}
                         else if ( strcmp(simb->cadeia, escopocorrente) == 0) {}
                         else{
+                            //printf("- O simb e: %s, %d -",simb->cadeia,simb->tvar);
+                            //printf("- O tipo do FuncCall e: %d -",$$.tipo);
                             lista *aux = $5;
                             int deuRuim = 0;
                             int tamanhoDoSubido = 0;
 
+                            $$.tipo = simb->tvar;
                             $$.opnd.tipo = FUNCAO;
                             $$.opnd.atr.simb = simb;
                             $$.opnd.atr.simb->cadeia = $1;
@@ -1168,6 +1176,7 @@ FuncCall        :       ID  {
 
                             operando result;
                             result.tipo = VAROPND;
+                            //printf("- Criando a temporaria com: %d -",$$.tipo);
                             result.atr.simb = NovaTemp($$.tipo);
                             result.isTemp = 1;
                             GeraQuadrupla(OPCALL, op, op2, result, 1);
@@ -1496,43 +1505,43 @@ int hash (char *cadeia) {
 /* ImprimeTabSimb: Imprime todo o conteudo da tabela de simbolos  */
 
 void ImprimeTabSimb () {
-    // int i; simbolo s;
-    // printf ("\n\n   TABELA  DE  SIMBOLOS:\n\n");
-    // for (i = 0; i < NCLASSHASH; i++)
-    //     if (tabsimb[i]) {
-    //         printf ("Classe %d:\n", i);
-    //         for (s = tabsimb[i]; s!=NULL; s = s->prox){
-    //             printf ("  (%s, %s", s->cadeia,  nometipid[s->tid]);
-    //             if (s->tid == IDVAR){
-    //                 printf (", %s, Escopo: %s, %d, %d",
-    //                     nometipvar[s->tvar], s->escopo, s->inic, s->ref);
-    //                 if (s->array == VERDADE) {
-    //                     int j;
-    //                     printf (", EH ARRAY\n\tndims = %d, dimensoes:", s->ndims);
-    //                     for (j = 1; j <= s->ndims; j++)
-    //                                 printf ("  %d", s->dims[j]);
-    //                 }
-    //
-    //             }
-    //             if (s->tid == IDFUNC){
-    //                 printf (", %s, Escopo: %s",nometipvar[s->tvar], s->escopo);
-    //                 printf(", Quant de parametros: %d", s->param->tipo);
-    //                 parametros p = s->param->prox;
-    //                 if (s->param->prox > 0) {
-    //                   printf(", Tipos dos paramentros: ");
-    //                   while(p != NULL) {
-    //                     if (p->prox == NULL) {
-    //                       printf("%s", nometipvar[p->tipo]);
-    //                     } else {
-    //                       printf("%s, ", nometipvar[p->tipo]);
-    //                     }
-    //                     p = p->prox;
-    //                   }
-    //                 }
-    //             }
-    //             printf(")\n");
-    //         }
-    //     }
+     int i; simbolo s;
+     printf ("\n\n   TABELA  DE  SIMBOLOS:\n\n");
+     for (i = 0; i < NCLASSHASH; i++)
+         if (tabsimb[i]) {
+            printf ("Classe %d:\n", i);
+            for (s = tabsimb[i]; s!=NULL; s = s->prox){
+                printf ("  (%s, %s", s->cadeia,  nometipid[s->tid]);
+               if (s->tid == IDVAR){
+                   printf (", %s, Escopo: %s, %d, %d",
+                       nometipvar[s->tvar], s->escopo, s->inic, s->ref);
+              //     if (s->array == VERDADE) {
+              //         int j;
+              //         printf (", EH ARRAY\n\tndims = %d, dimensoes:", s->ndims);
+              //         for (j = 1; j <= s->ndims; j++)
+              //                     printf ("  %d", s->dims[j]);
+              //     }
+    
+               }
+               if (s->tid == IDFUNC){
+                   printf (", %s, Escopo: %s",nometipvar[s->tvar], s->escopo);
+                   printf(", Quant de parametros: %d", s->param->tipo);
+                   parametros p = s->param->prox;
+                   if (s->param->prox > 0) {
+                     printf(", Tipos dos paramentros: ");
+                     while(p != NULL) {
+                       if (p->prox == NULL) {
+                         printf("%s", nometipvar[p->tipo]);
+                       } else {
+                         printf("%s, ", nometipvar[p->tipo]);
+                       }
+                       p = p->prox;
+                     }
+                   }
+               }
+                printf(")\n");
+             }
+         }
 }
 
 /*  Mensagens de erros semanticos  */
